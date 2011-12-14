@@ -29,10 +29,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.lightcouch.DesignDocument.MapReduce;
+import org.lightcouch.DesignDocument.FullTextIndex;
 
 /**
- * Provides methods to create and save CouchDB design documents. 
+ * Provides methods to create and save CouchDB design documents.
  * <h3>Usage Example:</h3>
  * <pre>
  * DesignDocument exampleDoc = dbClient.design().getFromDesk("example");
@@ -43,24 +46,26 @@ import org.lightcouch.DesignDocument.MapReduce;
  * @author Ahmed Yehia
  */
 public class CouchDbDesign {
-	
+
+    private static final Log log = LogFactory.getLog(CouchDbDesign.class);
+
 	private static final String DESIGN_DOCS_DIR = "design-docs";
-	
+
 	private CouchDbClient dbc;
-	
+
 	CouchDbDesign(CouchDbClient dbc) {
 		this.dbc = dbc;
 	}
-	
+
 	/**
 	 * Synchronizes a design document to the Database.
 	 * <p>This method will first try to find a document in the database with the same id
 	 * as the given document, if it is not found then the given document will be saved to the database.
 	 * <p>If the document was found in the database, it will be compared with the given document using
-	 *  {@code equals()}. If both documents are not equal, then the given document will be saved to the 
+	 *  {@code equals()}. If both documents are not equal, then the given document will be saved to the
 	 *  database and updates the existing document.
 	 * @param document The design document to synchronize
-	 * @return {@link Response} as a result of a document save or update, or returns {@code null} if no 
+	 * @return {@link Response} as a result of a document save or update, or returns {@code null} if no
 	 * action was taken and the document in the database is up-to-date with the given document.
 	 */
 	public Response synchronizeWithDb(DesignDocument document) {
@@ -71,13 +76,13 @@ public class CouchDbDesign {
 		} catch (NoDocumentException e) {
 			return dbc.save(document);
 		}
-		if(!document.equals(documentFromDb)) { 
+		if(!document.equals(documentFromDb)) {
 			document.setRevision(documentFromDb.getRevision());
 			return dbc.update(document);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Synchronize all design documents from desk to the database.
 	 * @see #synchronizeDesignDocWithDb
@@ -88,7 +93,7 @@ public class CouchDbDesign {
 			synchronizeWithDb(dd);
 		}
 	}
-	
+
 	/**
 	 * Gets a design document from the database.
 	 * @param id The document id
@@ -99,7 +104,7 @@ public class CouchDbDesign {
 		URI uri = builder(dbc.getDBUri()).path(id).build();
 		return dbc.get(uri, DesignDocument.class);
 	}
-	
+
 	/**
 	 * Gets a design document from the database.
 	 * @param id The document id
@@ -112,7 +117,7 @@ public class CouchDbDesign {
 		URI uri = builder(dbc.getDBUri()).path(id).query("rev", rev).build();
 		return dbc.get(uri, DesignDocument.class);
 	}
-	
+
 	/**
 	 * Gets all design documents from desk.
 	 */
@@ -126,10 +131,10 @@ public class CouchDbDesign {
 		List<DesignDocument> designDocsList = new ArrayList<DesignDocument>();
 		for (String docName : rootDir.list()) {
 			designDocsList.add(getFromDesk(docName));
-		} 
+		}
 		return designDocsList;
 	}
-	
+
 	/**
 	 * Gets a design document from desk.
 	 * @param id The document id to get.
@@ -150,7 +155,8 @@ public class CouchDbDesign {
 		Map<String, String> filters = null;
 		Map<String, String> lists = null;
 		Map<String, String> shows = null;
-		Map<String, MapReduce> views = null;
+        Map<String, MapReduce> views = null;
+        Map<String, FullTextIndex> fulltext = null;
 		String[] elements = designDoc.list();
 		lists   = populateFunctions(lists, designDoc, elements, "lists");
 		filters = populateFunctions(lists, designDoc, elements, "filters");
@@ -185,15 +191,34 @@ public class CouchDbDesign {
 				views.put(viewDirName, mr);
 			} // /foreach view dirs
 		} // /view functions
-		dd.setId("_design/" + id); 
+		if(Arrays.asList(elements).contains("fulltext")) { // fulltext functions
+			File fulltextRootDir = new File(designDoc, "fulltext");
+			fulltext = new HashMap<String, FullTextIndex>();
+			for (String fulltextDirName : fulltextRootDir.list()) { // fulltext dirs
+				FullTextIndex fti = dd.new FullTextIndex();
+				File fulltextDir = new File(fulltextRootDir, fulltextDirName);
+				for (String fileName : fulltextDir.list()) { // fulltext sub dirs
+                    String code = readFile(new File(fulltextDir, fileName));
+					if(fileName.equals("index.js"))
+						fti.setIndex(code);
+                    else if(fileName.equals("reduce.js"))
+                        fti.setDefaults(code);
+                    else if(fileName.equals("analyzer.js"))
+                        fti.setAnalyzer(code);
+				} // /foreach view sub dirs
+				fulltext.put(fulltextDirName, fti);
+			} // /foreach view dirs
+		} // /view functions
+		dd.setId("_design/" + id);
 		dd.setLanguage("javascript");
 		dd.setViews(views);
 		dd.setFilters(filters);
 		dd.setShows(shows);
 		dd.setLists(lists);
+        dd.setFulltext(fulltext);
 		return dd;
 	}
-	
+
 	private Map<String, String> populateFunctions(Map<String, String> functionsMap,
 			File designDoc, String[] elements, String element) {
 		if(Arrays.asList(elements).contains(element)) {

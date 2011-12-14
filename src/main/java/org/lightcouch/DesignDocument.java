@@ -26,14 +26,15 @@ import com.google.gson.annotations.SerializedName;
  * @author Ahmed Yehia
  */
 public class DesignDocument extends Document {
-	
+
 	private String language;
 	private Map<String, MapReduce> views;
 	@SerializedName("validate_doc_update")
 	private String validateDocUpdate;
 	private Map<String, String> filters;
 	private Map<String, String> shows;
-	private Map<String, String> lists;
+    private Map<String, String> lists;
+    private Map<String, FullTextIndex> fulltext;
 
 	public String getLanguage() {
 		return language;
@@ -59,7 +60,11 @@ public class DesignDocument extends Document {
 		return lists;
 	}
 
-	public void setLanguage(String language) {
+    public Map<String, FullTextIndex> getFulltext() {
+        return fulltext;
+    }
+
+    public void setLanguage(String language) {
 		this.language = language;
 	}
 
@@ -83,6 +88,10 @@ public class DesignDocument extends Document {
 		this.lists = lists;
 	}
 
+    public void setFulltext(Map<String, FullTextIndex> fulltext) {
+        this.fulltext = fulltext;
+    }
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -93,12 +102,13 @@ public class DesignDocument extends Document {
 		result = prime * result + ((shows == null) ? 0 : shows.hashCode());
 		result = prime * result
 				+ ((validateDocUpdate == null) ? 0 : validateDocUpdate.hashCode());
-		result = prime * result + ((views == null) ? 0 : views.hashCode());
+        result = prime * result + ((views == null) ? 0 : views.hashCode());
+        result = prime * result + ((fulltext == null) ? 0 : fulltext.hashCode());
 		return result;
 	}
 
 	/**
-	 * Indicates whether some other design document is equals to this one. 
+	 * Indicates whether some other design document is equals to this one.
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -138,6 +148,11 @@ public class DesignDocument extends Document {
 			if (other.views != null)
 				return false;
 		} else if (!views.equals(other.views))
+			return false;
+		if (fulltext == null) {
+			if (other.fulltext != null)
+				return false;
+		} else if (!fulltext.equals(other.fulltext))
 			return false;
 		return true;
 	}
@@ -198,4 +213,59 @@ public class DesignDocument extends Document {
 		}
 
 	} // /class MapReduce
+
+	/**
+	 * Holds couchdb-lucene FTI functions in a view.
+	 */
+	public class FullTextIndex {
+		private String index;
+		private String defaults;
+        private String analyzer;
+
+        public String getIndex() {
+            return index;
+        }
+
+        public void setIndex(String index) {
+            this.index = index;
+        }
+
+        public String getDefaults() {
+            return defaults;
+        }
+
+        public void setDefaults(String defaults) {
+            this.defaults = defaults;
+        }
+
+        public String getAnalyzer() {
+            return analyzer;
+        }
+
+        public void setAnalyzer(String analyzer) {
+            this.analyzer = analyzer;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FullTextIndex that = (FullTextIndex) o;
+
+            if (analyzer != null ? !analyzer.equals(that.analyzer) : that.analyzer != null) return false;
+            if (defaults != null ? !defaults.equals(that.defaults) : that.defaults != null) return false;
+            if (!index.equals(that.index)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = index.hashCode();
+            result = 31 * result + (defaults != null ? defaults.hashCode() : 0);
+            result = 31 * result + (analyzer != null ? analyzer.hashCode() : 0);
+            return result;
+        }
+    } // /class FullTextIndex
 }
