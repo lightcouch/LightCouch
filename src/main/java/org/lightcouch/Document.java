@@ -17,25 +17,29 @@
 package org.lightcouch;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Convenient base class for CouchDB documents, defines the basic 
+ * Convenient base class for CouchDB documents, defines the basic
  * id and revision properties and attachments.
  * @author Ahmed Yehia
  *
  */
 public class Document {
-	
+
 	@SerializedName("_id")
 	private String id;
 	@SerializedName("_rev")
 	private String revision;
 	@SerializedName("_attachments")
-	private Map<String, Attachment> attachments 
-		= new HashMap<String, Attachment>(); 
+	private Map<String, Attachment> attachments
+		= new HashMap<String, Attachment>();
+    // hopefully CouchDB won't mind if _revs_info is present in PUT request
+	@SerializedName("_revs_info")
+	private List<RevInfo> revsInfo;
 
 	public String getId() {
 		return id;
@@ -44,23 +48,27 @@ public class Document {
 	public String getRevision() {
 		return revision;
 	}
-	
+
 	public Map<String, Attachment> getAttachments() {
 		return attachments;
 	}
 
-	public void setId(String id) {
+    public List<RevInfo> getRevsInfo() {
+        return revsInfo;
+    }
+
+    public void setId(String id) {
 		this.id = id;
 	}
 
 	public void setRevision(String revision) {
 		this.revision = revision;
 	}
-	
+
 	public void setAttachments(Map<String, Attachment> attachments) {
 		this.attachments = attachments;
 	}
-	
+
 	public void addAttachment(String name, Attachment attachment) {
 		this.attachments.put(name, attachment);
 	}

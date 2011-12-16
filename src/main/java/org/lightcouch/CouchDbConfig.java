@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 class CouchDbConfig {
 	private static final Log log = LogFactory.getLog(CouchDbConfig.class);
 	private static final String DEFAULT_FILE = "couchdb.properties";
-	
+
 	// ------------------------------------------------------- Fields
 	// ----------------------- required
 	private String dbName;
@@ -41,27 +41,28 @@ class CouchDbConfig {
 	private int port;
 	private String username;
 	private String password;
-	
-	// ----------------------- optional 
-	private int socketTimeout; 
+    private boolean revsInfo;
+
+	// ----------------------- optional
+	private int socketTimeout;
 	private int connectionTimeout;
 	// add more
 
 	public CouchDbConfig() {
 		this(DEFAULT_FILE);
 	}
-	
+
 	public CouchDbConfig(String configFileName) {
 		readConfigFile(configFileName);
 		setConfiguration(configFileName);
 	}
-	
-	public CouchDbConfig(String dbName, boolean createDbIfNotExist, String protocol, String host, int port, String username, String password) {
+
+	public CouchDbConfig(String dbName, boolean createDbIfNotExist, String protocol, String host, int port, String username, String password, boolean revsInfo) {
 		assertNotEmpty(dbName, "Database name");
 		assertNotEmpty(protocol, "Protocol");
 		assertNotEmpty(host, "Host address");
 		assertNotEmpty(port, "Port Number");
-		
+
 		this.dbName = dbName;
 		this.createDbIfNotExist = createDbIfNotExist;
 		this.protocol = protocol;
@@ -69,8 +70,9 @@ class CouchDbConfig {
 		this.port = port;
 		this.username = username;
 		this.password = password;
+        this.revsInfo = revsInfo;
 	}
-	
+
 	private void setConfiguration(String file) {
 		try {
 			this.dbName = getProperty("couchdb.name", true, file);
@@ -80,12 +82,14 @@ class CouchDbConfig {
 			this.port = Integer.parseInt(getProperty("couchdb.port", true, file));
 			this.username = getProperty("couchdb.username", true, file);
 			this.password = getProperty("couchdb.password", true, file);
-			
+
 			// get optional
 			String prop = getProperty("couchdb.http.socket.timeout", false, file);
-			this.socketTimeout = (prop != null) ? Integer.parseInt(prop) : 0;     // 0 is default 
+			this.socketTimeout = (prop != null) ? Integer.parseInt(prop) : 0;     // 0 is default
 			prop = getProperty("couchdb.http.socket.buffer-size", false, file);
 			this.connectionTimeout = (prop != null) ? Integer.parseInt(prop) : 0; // 0 is default
+            prop = getProperty("couchdb.revs-info", false, file);
+            this.revsInfo = (prop != null) ? Boolean.parseBoolean(prop) : false;
 		} catch (Exception e) {
 			String msg = "Error reading properties from configuration file: " + file;
 			log.error(msg);
@@ -102,11 +106,11 @@ class CouchDbConfig {
 	public boolean isCreateDbIfNotExist() {
 		return createDbIfNotExist;
 	}
-	
+
 	public String getProtocol() {
 		return protocol;
 	}
-	
+
 	public String getHost() {
 		return host;
 	}
@@ -114,7 +118,7 @@ class CouchDbConfig {
 	public int getPort() {
 		return port;
 	}
-	
+
 	public String getUsername() {
 		return username;
 	}
@@ -122,15 +126,19 @@ class CouchDbConfig {
 	public String getPassword() {
 		return password;
 	}
-	
-	public int getSocketTimeout() {
+
+    public boolean isRevsInfo() {
+        return revsInfo;
+    }
+
+    public int getSocketTimeout() {
 		return socketTimeout;
 	}
 
 	public int getConnectionTimeout() {
 		return connectionTimeout;
 	}
-	
+
 	public void resetPassword() {
 		this.password = "";
 		this.password = null;
