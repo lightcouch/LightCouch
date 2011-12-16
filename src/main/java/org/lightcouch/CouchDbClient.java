@@ -253,6 +253,13 @@ public final class CouchDbClient extends CouchDbClientBase {
 		return true;
 	}
 
+    public FTSResult fts(FTSQuery q) {
+        assertNotEmpty(q, "Query");
+        URIBuilder builder = builder(getFtsUri()).path("_design/")
+                .path(q.getDesignName()).path("/").path(q.getIndexName()).query("q", q.getQuery()).query("default_operator", "AND");
+        return get(builder.build(), FTSResult.class);
+    }
+
 	/**
 	 * Saves an object in the database.
 	 * @param object The object to save

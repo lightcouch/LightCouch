@@ -41,11 +41,11 @@ class CouchDbConfig {
 	private int port;
 	private String username;
 	private String password;
-    private boolean revsInfo;
 
 	// ----------------------- optional
 	private int socketTimeout;
 	private int connectionTimeout;
+    private boolean revsInfo;
 	// add more
 
 	public CouchDbConfig() {

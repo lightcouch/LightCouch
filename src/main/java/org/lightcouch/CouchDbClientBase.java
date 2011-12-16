@@ -93,7 +93,8 @@ abstract class CouchDbClientBase {
 
 	private HttpClient httpClient;
 	private URI baseURI;
-	private URI dbURI;
+    private URI dbURI;
+    private URI ftsURI;
 	private Gson gson;
 	protected CouchDbConfig config;
 
@@ -110,6 +111,7 @@ abstract class CouchDbClientBase {
 		this.config = config;
 		baseURI = builder().scheme(config.getProtocol()).host(config.getHost()).port(config.getPort()).path("/").build();
 		dbURI   = builder(baseURI).path(config.getDbName()).path("/").build();
+		ftsURI = builder(baseURI).path("_fti/").path("local/").path(config.getDbName()).path("/").build();
 	}
 
 	// ---------------------------------------------- Getters
@@ -125,7 +127,11 @@ abstract class CouchDbClientBase {
 		return baseURI;
 	}
 
-	protected Gson getGson() {
+    public URI getFtsUri() {
+        return ftsURI;
+    }
+
+    protected Gson getGson() {
 		return gson;
 	}
 
