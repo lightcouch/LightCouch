@@ -256,7 +256,11 @@ public final class CouchDbClient extends CouchDbClientBase {
     public FTSResult fts(FTSQuery q) {
         assertNotEmpty(q, "Query");
         URIBuilder builder = builder(getFtsUri()).path("_design/")
-                .path(q.getDesignName()).path("/").path(q.getIndexName()).query("q", q.getQuery()).query("default_operator", "AND");
+                .path(q.getDesignName()).path("/").path(q.getIndexName())
+                .query("q", q.getQuery())
+                .query("default_operator", "AND")
+                .query("limit", q.getLimit())
+                .query("skip", q.getSkip());
         return get(builder.build(), FTSResult.class);
     }
 
