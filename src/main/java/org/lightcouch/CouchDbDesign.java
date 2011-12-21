@@ -177,7 +177,7 @@ public class CouchDbDesign {
         }
         for (String dir : dirs.keySet()) {
             List<String> files = dirs.get(dir);
-            p = Pattern.compile(doc + "/" + what + "/" + dir + "/(" + pattern + ")\\.js");
+            p = Pattern.compile("^" + doc + "/" + what + "/" + dir + "/(" + pattern + ")\\.js$");
             for (String n : res) {
                 Matcher m = p.matcher(n);
                 if (m.matches())
