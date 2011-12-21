@@ -21,18 +21,17 @@ import static org.lightcouch.URIBuilder.builder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.lightcouch.DesignDocument.MapReduce;
-import org.lightcouch.DesignDocument.FullTextIndex;
 
 /**
  * Provides methods to create and save CouchDB design documents.
@@ -51,13 +50,144 @@ public class CouchDbDesign {
 
 	private static final String DESIGN_DOCS_DIR = "design-docs";
 
+    private Set<String> allDesignResources = new HashSet<String>();
+    private Set<String> allDesignDocs = new HashSet<String>();
+    private Map<String, List<String>> docLists = new HashMap<String, List<String>>();
+    private Map<String, List<String>> docFilters = new HashMap<String, List<String>>();
+    private Map<String, List<String>> docShows = new HashMap<String, List<String>>();
+    private Map<String, List<String>> docValidators = new HashMap<String, List<String>>();
+    private Map<String, Map<String, List<String>>> docViews = new HashMap<String, Map<String, List<String>>>();
+    private Map<String, Map<String, List<String>>> docFulltext = new HashMap<String, Map<String, List<String>>>();
+
 	private CouchDbClient dbc;
 
 	CouchDbDesign(CouchDbClient dbc) {
 		this.dbc = dbc;
 	}
 
-	/**
+    private void enumerateDesignResources() {
+        if (!allDesignDocs.isEmpty())
+            return;
+        Enumeration<URL> urls;
+        try {
+            urls = getURLs(DESIGN_DOCS_DIR);
+            if (!urls.hasMoreElements() && log.isDebugEnabled())
+                log.debug("No URLs returned by classloader for " + DESIGN_DOCS_DIR + " resource");
+        } catch (IOException e) {
+            log.warn("Cannot enumerate design doc resources in " + DESIGN_DOCS_DIR, e);
+            return;
+        }
+
+        while (urls.hasMoreElements()) {
+            URL url = null;
+            try {
+                url = urls.nextElement();
+                if (log.isDebugEnabled())
+                    log.debug("URL from classloader: " + url);
+
+                String proto = url.getProtocol();
+                String path = url.getPath();
+                if (log.isDebugEnabled())
+                    log.debug("proto = " + proto + " path = " + path);
+                if ("file".equals(proto)) {
+                    enumerateFiles(new File(path));
+                } else if ("jar".equals(proto)) {
+                    enumerateJar(path);
+                } else {
+                    if (log.isDebugEnabled())
+                        log.debug("Not enumerating design doc resources in " + url);
+                    continue;
+                }
+            } catch (IOException e) {
+                log.debug("Cannot read entries in URL: " + url, e);
+            }
+        }
+
+        extractDesignResourceNames();
+        allDesignResources.clear();
+    }
+
+    private void extractDesignResourceNames() {
+        for (String n : allDesignResources) {
+            if (n.matches("[^/]+/")) {
+                String doc = n.substring(0, n.length() - 1);
+                allDesignDocs.add(doc);
+            }
+        }
+        for (String doc : allDesignDocs) {
+            populateFunctionNames(doc, "lists", allDesignResources, docLists);
+            populateFunctionNames(doc, "filters", allDesignResources, docFilters);
+            populateFunctionNames(doc, "shows", allDesignResources, docShows);
+            populateFunctionNames(doc, "validate_doc_update", allDesignResources, docValidators);
+            populateFunctionGroups(doc, "views", allDesignResources, docViews, "map|reduce");
+            populateFunctionGroups(doc, "fulltext", allDesignResources, docFulltext, "index|defaults|analyzer");
+        }
+    }
+
+    private void enumerateFiles(File f) {
+        String path = f.getAbsolutePath();
+        path = path.substring(path.lastIndexOf(DESIGN_DOCS_DIR));
+        if (!DESIGN_DOCS_DIR.equals(path)) {
+            path = path.substring(DESIGN_DOCS_DIR.length()+1);
+            if (f.isDirectory())
+                path += "/";
+            else if (log.isWarnEnabled() && allDesignResources.contains(path))
+                log.warn("Design resource duplicate: " + f.getAbsolutePath());
+            allDesignResources.add(path);
+        }
+        if (f.isDirectory()) {
+            for (File s : f.listFiles())
+                enumerateFiles(s);
+        }
+    }
+
+    private void enumerateJar(String path) throws IOException {
+        path = path.substring(5, path.indexOf("!"));
+        JarFile j = new JarFile(path);
+        Enumeration<JarEntry> e = j.entries();
+        while (e.hasMoreElements()) {
+            JarEntry f = e.nextElement();
+            String name = f.getName();
+            if (name.startsWith(DESIGN_DOCS_DIR + "/") && name.length() > DESIGN_DOCS_DIR.length()+1) {
+                name = name.substring(DESIGN_DOCS_DIR.length()+1);
+                if (log.isWarnEnabled() && !name.endsWith("/") && allDesignResources.contains(name))
+                    log.warn("Design resource duplicate: " + name);
+                allDesignResources.add(name);
+            }
+        }
+    }
+
+    private void populateFunctionNames(String doc, String what, Set<String> res, Map<String, List<String>> list) {
+        List<String> files = new ArrayList<String>();
+        for (String n : res) {
+            if (n.matches("^" + doc + "/" + what + "/.+\\.js$"))
+                files.add(n);
+        }
+        list.put(doc, files);
+    }
+
+    private void populateFunctionGroups(String doc, String what, Set<String> res,
+                                        Map<String, Map<String, List<String>>> list, String pattern) {
+        Map<String, List<String>> dirs = new HashMap<String, List<String>>();
+        Pattern p = Pattern.compile("^" + doc + "/" + what + "/(.+)/$");
+        for (String n : res) {
+            Matcher m = p.matcher(n);
+            if (m.matches())
+                dirs.put(m.group(1), new ArrayList<String>());
+        }
+        for (String dir : dirs.keySet()) {
+            List<String> files = dirs.get(dir);
+            p = Pattern.compile(doc + "/" + what + "/" + dir + "/(" + pattern + ")\\.js");
+            for (String n : res) {
+                Matcher m = p.matcher(n);
+                if (m.matches())
+                    files.add(n);
+            }
+        }
+        list.put(doc, dirs);
+    }
+
+    /**
 	 * Synchronizes a design document to the Database.
 	 * <p>This method will first try to find a document in the database with the same id
 	 * as the given document, if it is not found then the given document will be saved to the database.
@@ -85,7 +215,7 @@ public class CouchDbDesign {
 
 	/**
 	 * Synchronize all design documents from desk to the database.
-	 * @see #synchronizeDesignDocWithDb
+	 * @see #synchronizeWithDb
 	 */
 	public void synchronizeAllWithDb() {
 		List<DesignDocument> documents = getAllFromDesk();
@@ -122,16 +252,10 @@ public class CouchDbDesign {
 	 * Gets all design documents from desk.
 	 */
 	public List<DesignDocument> getAllFromDesk() {
-		File rootDir = null;
-		try {
-			rootDir = new File(getURL(DESIGN_DOCS_DIR).toURI());
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
-		List<DesignDocument> designDocsList = new ArrayList<DesignDocument>();
-		for (String docName : rootDir.list()) {
-			designDocsList.add(getFromDesk(docName));
-		}
+        enumerateDesignResources();
+        List<DesignDocument> designDocsList = new ArrayList<DesignDocument>(allDesignDocs.size());
+        for (String doc : allDesignDocs)
+            designDocsList.add(getFromDesk(doc));
 		return designDocsList;
 	}
 
@@ -142,93 +266,53 @@ public class CouchDbDesign {
 	 */
 	public DesignDocument getFromDesk(String id) {
 		assertNotEmpty(id, "id");
-		File designDoc = null;
-		try {
-			designDoc = new File(new File(getURL(DESIGN_DOCS_DIR).toURI()), id);
-			if(!designDoc.exists()) {
-				throw new FileNotFoundException();
-			}
-		} catch (Exception e) {
-			throw new IllegalArgumentException(e);
-		}
+        enumerateDesignResources();
+        if (!allDesignDocs.contains(id))
+            throw new IllegalArgumentException("No design document found: " + id);
+
 		DesignDocument dd = new DesignDocument();
-		Map<String, String> filters = null;
-		Map<String, String> lists = null;
-		Map<String, String> shows = null;
-        Map<String, MapReduce> views = null;
-        Map<String, FullTextIndex> fulltext = null;
-		String[] elements = designDoc.list();
-		lists   = populateFunctions(lists, designDoc, elements, "lists");
-		filters = populateFunctions(lists, designDoc, elements, "filters");
-		shows   = populateFunctions(lists, designDoc, elements, "shows");
-		// validate_doc_update functions
-		if(Arrays.asList(elements).contains("validate_doc_update")) {
-			File validateDir = new File(designDoc, "validate_doc_update");
-			String[] validateFunctions = validateDir.list();
-			if(validateFunctions.length != 1) {
-				throw new IllegalArgumentException("Expecting exactly one validate_doc_update function file");
-			}
-			File validateFile = new File(validateDir, validateFunctions[0]);
-			dd.setValidateDocUpdate(readFile(validateFile));
-		} // /validate_doc_update
-		if(Arrays.asList(elements).contains("views")) { // view functions
-			File viewsRootDir = new File(designDoc, "views");
-			views = new HashMap<String, MapReduce>();
-			for (String viewDirName : viewsRootDir.list()) { // view dirs
-				MapReduce mr = dd.new MapReduce();
-				File viewDir = new File(viewsRootDir, viewDirName);
-				String map = null;
-				String reduce = null;
-				for (String mapReduceFileName : viewDir.list()) { // view sub dirs
-					if(mapReduceFileName.equals("map.js")) {
-						map = readFile(new File(viewDir, mapReduceFileName));
-						mr.setMap(map);
-					} else if(mapReduceFileName.equals("reduce.js")) {
-						reduce = readFile(new File(viewDir, mapReduceFileName));
-						mr.setReduce(reduce);
-					}
-				} // /foreach view sub dirs
-				views.put(viewDirName, mr);
-			} // /foreach view dirs
-		} // /view functions
-		if(Arrays.asList(elements).contains("fulltext")) { // fulltext functions
-			File fulltextRootDir = new File(designDoc, "fulltext");
-			fulltext = new HashMap<String, FullTextIndex>();
-			for (String fulltextDirName : fulltextRootDir.list()) { // fulltext dirs
-				FullTextIndex fti = dd.new FullTextIndex();
-				File fulltextDir = new File(fulltextRootDir, fulltextDirName);
-				for (String fileName : fulltextDir.list()) { // fulltext sub dirs
-                    String code = readFile(new File(fulltextDir, fileName));
-					if(fileName.equals("index.js"))
-						fti.setIndex(code);
-                    else if(fileName.equals("reduce.js"))
-                        fti.setDefaults(code);
-                    else if(fileName.equals("analyzer.js"))
-                        fti.setAnalyzer(code);
-				} // /foreach view sub dirs
-				fulltext.put(fulltextDirName, fti);
-			} // /foreach view dirs
-		} // /view functions
-		dd.setId("_design/" + id);
-		dd.setLanguage("javascript");
-		dd.setViews(views);
-		dd.setFilters(filters);
-		dd.setShows(shows);
-		dd.setLists(lists);
-        dd.setFulltext(fulltext);
+        dd.setId("_design/" + id);
+        dd.setLanguage("javascript");
+        dd.setLists(readFunctions(id, "lists", docLists));
+        dd.setFilters(readFunctions(id, "filters", docFilters));
+        dd.setShows(readFunctions(id, "shows", docShows));
+        List<String> validators = docValidators.get(id);
+        if (validators != null && !validators.isEmpty()) {
+            if (validators.size() > 1)
+                throw new IllegalArgumentException("Expecting exactly one validate_doc_update function file: " + id);
+            dd.setValidateDocUpdate(readTextResource(DESIGN_DOCS_DIR + "/" + validators.get(0)));
+        }
+        dd.setViews(readFunctionGroups(id, "views", docViews));
+        dd.setFulltext(readFunctionGroups(id, "fulltext", docFulltext));
 		return dd;
 	}
 
-	private Map<String, String> populateFunctions(Map<String, String> functionsMap,
-			File designDoc, String[] elements, String element) {
-		if(Arrays.asList(elements).contains(element)) {
-			File functionsDir = new File(designDoc, element);
-			functionsMap = new HashMap<String, String>();
-			for (String functionFileName : functionsDir.list()) {
-				File functionFile = new File(functionsDir, functionFileName);
-				functionsMap.put(removeExtension(functionFileName), readFile(functionFile));
-			}
-		}
-		return functionsMap;
-	}
+    private Map<String, String> readFunctions(String id, String what, Map<String, List<String>> all) {
+        List<String> functions = all.get(id);
+        if (functions == null || functions.isEmpty())
+            return null;
+        Map<String, String> functionsMap = new HashMap<String, String>();
+        for (String name : functions) {
+            String funcName = name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".js"));
+            functionsMap.put(funcName, readTextResource(DESIGN_DOCS_DIR + "/" + name));
+        }
+        return functionsMap;
+    }
+
+    private Map<String, Map<String, String>> readFunctionGroups(String id, String what, Map<String, Map<String, List<String>>> all) {
+        Map<String, List<String>> groups = all.get(id);
+        if (groups == null || groups.isEmpty())
+            return null;
+        Map<String, Map<String, String>> groupFunctionsMap = new HashMap<String, Map<String, String>>();
+        for (String group : groups.keySet()) {
+            List<String> groupFunctions = groups.get(group);
+            Map<String, String> functionsMap = new HashMap<String, String>();
+            for (String name : groupFunctions) {
+                String funcName = name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".js"));
+                functionsMap.put(funcName, readTextResource(DESIGN_DOCS_DIR + "/" + name));
+            }
+            groupFunctionsMap.put(group, functionsMap);
+        }
+        return groupFunctionsMap;
+    }
 }

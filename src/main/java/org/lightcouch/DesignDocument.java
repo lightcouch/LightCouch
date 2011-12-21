@@ -28,19 +28,19 @@ import com.google.gson.annotations.SerializedName;
 public class DesignDocument extends Document {
 
 	private String language;
-	private Map<String, MapReduce> views;
+	private Map<String, Map<String, String>> views;
 	@SerializedName("validate_doc_update")
 	private String validateDocUpdate;
 	private Map<String, String> filters;
 	private Map<String, String> shows;
     private Map<String, String> lists;
-    private Map<String, FullTextIndex> fulltext;
+    private Map<String, Map<String, String>> fulltext;
 
 	public String getLanguage() {
 		return language;
 	}
 
-	public Map<String, MapReduce> getViews() {
+	public Map<String, Map<String, String>> getViews() {
 		return views;
 	}
 
@@ -60,7 +60,7 @@ public class DesignDocument extends Document {
 		return lists;
 	}
 
-    public Map<String, FullTextIndex> getFulltext() {
+    public Map<String, Map<String, String>> getFulltext() {
         return fulltext;
     }
 
@@ -68,7 +68,7 @@ public class DesignDocument extends Document {
 		this.language = language;
 	}
 
-	public void setViews(Map<String, MapReduce> views) {
+	public void setViews(Map<String, Map<String, String>> views) {
 		this.views = views;
 	}
 
@@ -88,7 +88,7 @@ public class DesignDocument extends Document {
 		this.lists = lists;
 	}
 
-    public void setFulltext(Map<String, FullTextIndex> fulltext) {
+    public void setFulltext(Map<String, Map<String, String>> fulltext) {
         this.fulltext = fulltext;
     }
 
@@ -156,116 +156,4 @@ public class DesignDocument extends Document {
 			return false;
 		return true;
 	}
-
-	/**
-	 * Holds Map Reduce functions in a view.
-	 * @author Ahmed Yehia
-	 */
-	public class MapReduce {
-		private String map;
-		private String reduce;
-
-		public String getMap() {
-			return map;
-		}
-
-		public String getReduce() {
-			return reduce;
-		}
-
-		public void setMap(String map) {
-			this.map = map;
-		}
-
-		public void setReduce(String reduce) {
-			this.reduce = reduce;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((map == null) ? 0 : map.hashCode());
-			result = prime * result + ((reduce == null) ? 0 : reduce.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			MapReduce other = (MapReduce) obj;
-			if (map == null) {
-				if (other.map != null)
-					return false;
-			} else if (!map.equals(other.map))
-				return false;
-			if (reduce == null) {
-				if (other.reduce != null)
-					return false;
-			} else if (!reduce.equals(other.reduce))
-				return false;
-			return true;
-		}
-
-	} // /class MapReduce
-
-	/**
-	 * Holds couchdb-lucene FTI functions in a view.
-	 */
-	public class FullTextIndex {
-		private String index;
-		private String defaults;
-        private String analyzer;
-
-        public String getIndex() {
-            return index;
-        }
-
-        public void setIndex(String index) {
-            this.index = index;
-        }
-
-        public String getDefaults() {
-            return defaults;
-        }
-
-        public void setDefaults(String defaults) {
-            this.defaults = defaults;
-        }
-
-        public String getAnalyzer() {
-            return analyzer;
-        }
-
-        public void setAnalyzer(String analyzer) {
-            this.analyzer = analyzer;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            FullTextIndex that = (FullTextIndex) o;
-
-            if (analyzer != null ? !analyzer.equals(that.analyzer) : that.analyzer != null) return false;
-            if (defaults != null ? !defaults.equals(that.defaults) : that.defaults != null) return false;
-            if (!index.equals(that.index)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = index.hashCode();
-            result = 31 * result + (defaults != null ? defaults.hashCode() : 0);
-            result = 31 * result + (analyzer != null ? analyzer.hashCode() : 0);
-            return result;
-        }
-    } // /class FullTextIndex
 }

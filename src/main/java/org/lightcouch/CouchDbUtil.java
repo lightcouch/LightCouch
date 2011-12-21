@@ -18,10 +18,9 @@ package org.lightcouch;
 
 import static java.lang.String.format;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -40,29 +39,29 @@ final class CouchDbUtil {
 	private CouchDbUtil() {
 		// Utility class
 	}
-	
+
 	public static void assertNotEmpty(Object object, String prefix) throws IllegalArgumentException {
 		if(object == null) {
 			throw new IllegalArgumentException(format("%s may not be null.", prefix));
 		} else if(object instanceof String && ((String)object).length() == 0) {
 			throw new IllegalArgumentException(format("%s may not be empty.", prefix));
-		} 
+		}
 	}
-	
+
 	public static void assertNull(Object object, String prefix) throws IllegalArgumentException {
 		if(object != null) {
 			throw new IllegalArgumentException(format("%s should be null.", prefix));
-		} 
+		}
 	}
-	
+
 	public static String generateUUID() {
 		return UUID.randomUUID().toString().replace("-", "");
 	}
-	
+
 	public static String removeExtension(String fileName) {
 		return fileName.substring(0, fileName.lastIndexOf('.'));
 	}
-	
+
 	// ------------------------------------------------------- JSON
 
 	public static JsonObject objectToJson(Gson gson, Object object) {
@@ -71,7 +70,7 @@ final class CouchDbUtil {
 		}
 		return gson.toJsonTree(object).getAsJsonObject();
 	}
-	
+
 	public static <T> T JsonToObject(Gson gson, JsonElement elem, String key, Class<T> classType) {
 		return gson.fromJson(elem.getAsJsonObject().get(key), classType);
 	}
@@ -80,27 +79,56 @@ final class CouchDbUtil {
 	 * @return A JSON element as a String, or null if not found.
 	 */
 	public static String getElement(JsonObject j, String e) {
-		return (j.get(e) == null) ? null : j.get(e).getAsString();  
+		return (j.get(e) == null) ? null : j.get(e).getAsString();
 	}
-	
+
 	public static long getElementAsLong(JsonObject j, String e) {
 		return (j.get(e) == null) ? 0L : j.get(e).getAsLong();
 	}
-	
+
 	public static int getElementAsInt(JsonObject j, String e) {
 		return (j.get(e) == null) ? 0 : j.get(e).getAsInt();
 	}
-	
+
 	// ----------------------------------------------------- Streams
-	
+
 	private static final String LINE_SEP = System.getProperty("line.separator");
+
+    public static String streamToString(InputStream stream) throws IOException {
+        return streamToString(stream, new InputStreamReader(stream));
+    }
+
+    public static String streamToString(InputStream stream, String charset) throws IOException {
+        return streamToString(stream, new InputStreamReader(stream, charset));
+    }
+
+    public static String utf8StreamToString(InputStream stream) throws IOException {
+        return streamToString(stream, "UTF-8");
+    }
+
+    public static String streamToString(InputStream stream, InputStreamReader reader) throws IOException {
+        char[] chrArr = new char[stream.available()];
+        int cnt = reader.read(chrArr);
+        reader.close();
+        stream.close();
+        return new String(chrArr, 0, cnt);
+    }
+
+	public static String readTextResource(String resourceName) {
+        try {
+            return utf8StreamToString(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	public static String readFile(File file) {
 		StringBuilder content = new StringBuilder((int)file.length());
 		Scanner scanner = null;
 		try {
 			scanner = new Scanner(file);
-			while(scanner.hasNextLine()) {        
+			while(scanner.hasNextLine()) {
 				content.append(scanner.nextLine() + LINE_SEP);
 			}
 		} catch (FileNotFoundException e) {
@@ -110,14 +138,18 @@ final class CouchDbUtil {
 		}
 		return content.toString();
 	}
-	
+
 	public static URL getURL(String resource) {
 		return Thread.currentThread().getContextClassLoader().getResource(resource);
 	}
-	
+
+	public static Enumeration<URL> getURLs(String resource) throws IOException {
+		return Thread.currentThread().getContextClassLoader().getResources(resource);
+	}
+
 	  /**
 	 * Closes the response input stream.
-	 * 
+	 *
 	 * @param response The {@link HttpResponse}
 	 */
 	public static void close(HttpResponse response) {
@@ -125,10 +157,10 @@ final class CouchDbUtil {
 			response.getEntity().getContent().close();
 		} catch (Exception e) {}
 	}
-	
+
 	/**
 	 * Closes a resource.
-	 * 
+	 *
 	 * @param c The {@link Closeable} resource.
 	 */
 	public static void close(Closeable c) {
