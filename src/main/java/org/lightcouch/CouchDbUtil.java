@@ -140,7 +140,10 @@ final class CouchDbUtil {
 	}
 
 	public static URL getURL(String resource) {
-		return Thread.currentThread().getContextClassLoader().getResource(resource);
+        URL u = Thread.currentThread().getContextClassLoader().getResource(resource);
+        if (u == null)
+            u = CouchDbUtil.class.getResource("/" + resource);
+		return u;
 	}
 
 	public static Enumeration<URL> getURLs(String resource) throws IOException {
