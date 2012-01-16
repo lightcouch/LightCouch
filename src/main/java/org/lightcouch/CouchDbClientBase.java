@@ -326,8 +326,8 @@ abstract class CouchDbClientBase {
                 public void process(
                         final HttpRequest request,
                         final HttpContext context) throws IOException {
-                	if(log.isInfoEnabled())
-        				log.info(">> " + request.getRequestLine());
+                	if(log.isDebugEnabled())
+        				log.debug(">> " + request.getRequestLine());
                 }
             });
 			// response interceptor
@@ -336,8 +336,8 @@ abstract class CouchDbClientBase {
                         final HttpResponse response,
                         final HttpContext context) throws IOException {
                 	validate(response);
-                	if(log.isInfoEnabled())
-        				log.info("<< Status: " + response.getStatusLine().getStatusCode());
+                	if(log.isDebugEnabled())
+        				log.debug("<< Status: " + response.getStatusLine().getStatusCode());
                 }
             });
 		} catch (Exception e) {
