@@ -34,7 +34,8 @@ public class Document {
 	private String id;
 	@SerializedName("_rev")
 	private String revision;
-	private Map<String, Attachment> _attachments
+	@SerializedName("_attachments")
+	private Map<String, Attachment> attachments
 		= new HashMap<String, Attachment>();
     // hopefully CouchDB won't mind if _revs_info is present in PUT request
 	@SerializedName("_revs_info")
@@ -49,7 +50,7 @@ public class Document {
 	}
 
 	public Map<String, Attachment> getAttachments() {
-		return _attachments;
+		return attachments;
 	}
 
     public List<RevInfo> getRevsInfo() {
@@ -65,11 +66,11 @@ public class Document {
 	}
 
 	public void setAttachments(Map<String, Attachment> attachments) {
-		this._attachments = attachments;
+		this.attachments = attachments;
 	}
 
 	public void addAttachment(String name, Attachment attachment) {
-		this._attachments.put(name, attachment);
+		this.attachments.put(name, attachment);
 	}
 
 	@Override
