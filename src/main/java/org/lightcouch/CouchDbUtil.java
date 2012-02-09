@@ -114,10 +114,9 @@ final class CouchDbUtil {
         return new String(chrArr, 0, cnt);
     }
 
-	public static String readTextResource(String resourceName) {
+	public static String readTextResource(String resource) {
         try {
-            return utf8StreamToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName));
+            return utf8StreamToString(getResource(resource));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -142,13 +141,23 @@ final class CouchDbUtil {
 	public static URL getURL(String resource) {
         URL u = Thread.currentThread().getContextClassLoader().getResource(resource);
         if (u == null)
-            u = CouchDbUtil.class.getResource("/" + resource);
+            u = CouchDbUtil.class.getClassLoader().getResource(resource);
 		return u;
 	}
 
 	public static Enumeration<URL> getURLs(String resource) throws IOException {
-		return Thread.currentThread().getContextClassLoader().getResources(resource);
+        Enumeration<URL> u = Thread.currentThread().getContextClassLoader().getResources(resource);
+        if (u == null || !u.hasMoreElements())
+            u = CouchDbUtil.class.getClassLoader().getResources(resource);
+        return u;
 	}
+
+    public static InputStream getResource(String resource) {
+        InputStream s = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
+        if (s == null)
+            s = CouchDbUtil.class.getClassLoader().getResourceAsStream(resource);
+        return s;
+    }
 
 	  /**
 	 * Closes the response input stream.
