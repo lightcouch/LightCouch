@@ -258,6 +258,7 @@ public final class CouchDbClient extends CouchDbClientBase {
         URIBuilder builder = builder(getFtsUri()).path("_design/")
                 .path(q.getDesignName()).path("/").path(q.getIndexName())
                 .query("q", q.getQuery())
+                .query("sort", q.getSort())
                 .query("default_operator", "AND")
                 .query("limit", q.getLimit())
                 .query("skip", q.getSkip());
