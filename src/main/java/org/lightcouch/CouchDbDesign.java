@@ -88,7 +88,7 @@ public class CouchDbDesign {
                 String proto = url.getProtocol();
                 String path = url.getPath();
                 if (log.isDebugEnabled())
-                    log.debug("proto = " + proto + " path = " + path);
+                    log.debug("proto = " + proto + "; path = " + path);
                 if ("file".equals(proto)) {
                     enumerateFiles(new File(path));
                 } else if ("jar".equals(proto)) {
@@ -108,9 +108,15 @@ public class CouchDbDesign {
     }
 
     private void extractDesignResourceNames() {
+        if (log.isDebugEnabled())
+            log.debug("extracting design resource names");
         for (String n : allDesignResources) {
-            if (n.matches("[^/]+/")) {
+            if (log.isTraceEnabled())
+                log.trace("matching " + n);
+            if (n.matches("[^/\\\\]+/")) { // does not contain / (unix, mac) and \ (win) in path
                 String doc = n.substring(0, n.length() - 1);
+                if (log.isTraceEnabled())
+                    log.trace("adding design resource " + doc);
                 allDesignDocs.add(doc);
             }
         }
@@ -126,6 +132,8 @@ public class CouchDbDesign {
 
     private void enumerateFiles(File f) {
         String path = f.getAbsolutePath();
+        if (log.isTraceEnabled())
+            log.trace("enumerating " + path);
         path = path.substring(path.lastIndexOf(DESIGN_DOCS_DIR));
         if (!DESIGN_DOCS_DIR.equals(path)) {
             path = path.substring(DESIGN_DOCS_DIR.length()+1);
@@ -133,6 +141,8 @@ public class CouchDbDesign {
                 path += "/";
             else if (log.isWarnEnabled() && allDesignResources.contains(path))
                 log.warn("Design resource duplicate: " + f.getAbsolutePath());
+            if (log.isTraceEnabled())
+                log.trace("adding " + path);
             allDesignResources.add(path);
         }
         if (f.isDirectory()) {
