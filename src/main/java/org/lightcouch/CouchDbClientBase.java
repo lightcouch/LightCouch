@@ -302,7 +302,8 @@ abstract class CouchDbClientBase {
 			}
 			SchemeRegistry schemeRegistry = new SchemeRegistry();
 			schemeRegistry.register(new Scheme(cf.getProtocol(), cf.getPort(), ssf));
-			ClientConnectionManager ccm = new ThreadSafeClientConnManager(schemeRegistry);
+            ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager(schemeRegistry);
+            ccm.setDefaultMaxPerRoute(100);
 			httpclient = new DefaultHttpClient(ccm);
 			host = new HttpHost(cf.getHost(), cf.getPort(), cf.getProtocol());
 			context = new BasicHttpContext();
