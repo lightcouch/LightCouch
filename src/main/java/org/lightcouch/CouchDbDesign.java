@@ -169,8 +169,9 @@ public class CouchDbDesign {
 
     private void populateFunctionNames(String doc, String what, Set<String> res, Map<String, List<String>> list) {
         List<String> files = new ArrayList<String>();
+        final String SEP = "[/\\\\]+";
         for (String n : res) {
-            if (n.matches("^" + doc + "/" + what + "/.+\\.js$"))
+            if (n.matches("^" + doc + SEP + what + SEP + ".+\\.js$"))
                 files.add(n);
         }
         list.put(doc, files);
@@ -179,7 +180,8 @@ public class CouchDbDesign {
     private void populateFunctionGroups(String doc, String what, Set<String> res,
                                         Map<String, Map<String, List<String>>> list, String pattern) {
         Map<String, List<String>> dirs = new HashMap<String, List<String>>();
-        Pattern p = Pattern.compile("^" + doc + "/" + what + "/(.+)/$");
+        final String SEP = "[/\\\\]+";
+        Pattern p = Pattern.compile("^" + doc + SEP + what + SEP + "(.+)/$");
         for (String n : res) {
             Matcher m = p.matcher(n);
             if (m.matches())
@@ -187,7 +189,7 @@ public class CouchDbDesign {
         }
         for (String dir : dirs.keySet()) {
             List<String> files = dirs.get(dir);
-            p = Pattern.compile("^" + doc + "/" + what + "/" + dir + "/(" + pattern + ")\\.js$");
+            p = Pattern.compile("^" + doc + SEP + what + SEP + dir + SEP + "(" + pattern + ")\\.js$");
             for (String n : res) {
                 Matcher m = p.matcher(n);
                 if (m.matches())
@@ -297,13 +299,17 @@ public class CouchDbDesign {
 		return dd;
 	}
 
+	private int lastStepIndex(String path) {
+	    return Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\")) + 1;
+	}
+
     private Map<String, String> readFunctions(String id, String what, Map<String, List<String>> all) {
         List<String> functions = all.get(id);
         if (functions == null || functions.isEmpty())
             return null;
         Map<String, String> functionsMap = new HashMap<String, String>();
         for (String name : functions) {
-            String funcName = name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".js"));
+            String funcName = name.substring(lastStepIndex(name), name.lastIndexOf(".js"));
             functionsMap.put(funcName, readTextResource(DESIGN_DOCS_DIR + "/" + name));
         }
         return functionsMap;
@@ -318,7 +324,7 @@ public class CouchDbDesign {
             List<String> groupFunctions = groups.get(group);
             Map<String, String> functionsMap = new HashMap<String, String>();
             for (String name : groupFunctions) {
-                String funcName = name.substring(name.lastIndexOf("/") + 1, name.lastIndexOf(".js"));
+                String funcName = name.substring(lastStepIndex(name), name.lastIndexOf(".js"));
                 functionsMap.put(funcName, readTextResource(DESIGN_DOCS_DIR + "/" + name));
             }
             groupFunctionsMap.put(group, functionsMap);
