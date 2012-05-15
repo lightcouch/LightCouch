@@ -20,7 +20,6 @@ import static org.lightcouch.CouchDbUtil.*;
 import static org.lightcouch.URIBuilder.builder;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -299,19 +298,17 @@ public class CouchDbDesign {
 		return dd;
 	}
 
-	private int lastStepIndex(String path) {
-	    return Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\")) + 1;
-	}
+    private String basename(String name) {
+        return name.substring(Math.max(name.lastIndexOf("/"), name.lastIndexOf("\\")) + 1, name.lastIndexOf(".js"));
+    }
 
     private Map<String, String> readFunctions(String id, String what, Map<String, List<String>> all) {
         List<String> functions = all.get(id);
         if (functions == null || functions.isEmpty())
             return null;
         Map<String, String> functionsMap = new HashMap<String, String>();
-        for (String name : functions) {
-            String funcName = name.substring(lastStepIndex(name), name.lastIndexOf(".js"));
-            functionsMap.put(funcName, readTextResource(DESIGN_DOCS_DIR + "/" + name));
-        }
+        for (String name : functions)
+            functionsMap.put(basename(name), readTextResource(DESIGN_DOCS_DIR + "/" + name));
         return functionsMap;
     }
 
@@ -323,10 +320,8 @@ public class CouchDbDesign {
         for (String group : groups.keySet()) {
             List<String> groupFunctions = groups.get(group);
             Map<String, String> functionsMap = new HashMap<String, String>();
-            for (String name : groupFunctions) {
-                String funcName = name.substring(lastStepIndex(name), name.lastIndexOf(".js"));
-                functionsMap.put(funcName, readTextResource(DESIGN_DOCS_DIR + "/" + name));
-            }
+            for (String name : groupFunctions)
+                functionsMap.put(basename(name), readTextResource(DESIGN_DOCS_DIR + "/" + name));
             groupFunctionsMap.put(group, functionsMap);
         }
         return groupFunctionsMap;
