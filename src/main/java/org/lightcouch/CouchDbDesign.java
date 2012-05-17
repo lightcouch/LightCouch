@@ -58,6 +58,15 @@ public class CouchDbDesign {
     private Map<String, Map<String, List<String>>> docViews = new HashMap<String, Map<String, List<String>>>();
     private Map<String, Map<String, List<String>>> docFulltext = new HashMap<String, Map<String, List<String>>>();
 
+	private static final String JAVASCRIPT      = "javascript";
+	private static final String DESIGN_PREFIX   = "_design/";
+	private static final String VALIDATE_DOC    = "validate_doc_update";
+	private static final String VIEWS           = "views";
+	private static final String FILTERS         = "filters";
+	private static final String SHOWS           = "shows";
+	private static final String LISTS           = "lists";
+	private static final String FULLTEXT        = "fulltext";
+
 	private CouchDbClient dbc;
 
 	CouchDbDesign(CouchDbClient dbc) {
@@ -120,12 +129,12 @@ public class CouchDbDesign {
             }
         }
         for (String doc : allDesignDocs) {
-            populateFunctionNames(doc, "lists", allDesignResources, docLists);
-            populateFunctionNames(doc, "filters", allDesignResources, docFilters);
-            populateFunctionNames(doc, "shows", allDesignResources, docShows);
-            populateFunctionNames(doc, "validate_doc_update", allDesignResources, docValidators);
-            populateFunctionGroups(doc, "views", allDesignResources, docViews, "map|reduce");
-            populateFunctionGroups(doc, "fulltext", allDesignResources, docFulltext, "index|defaults|analyzer");
+            populateFunctionNames(doc, LISTS, allDesignResources, docLists);
+            populateFunctionNames(doc, FILTERS, allDesignResources, docFilters);
+            populateFunctionNames(doc, SHOWS, allDesignResources, docShows);
+            populateFunctionNames(doc, VALIDATE_DOC, allDesignResources, docValidators);
+            populateFunctionGroups(doc, VIEWS, allDesignResources, docViews, "map|reduce");
+            populateFunctionGroups(doc, FULLTEXT, allDesignResources, docFulltext, "index|defaults|analyzer");
         }
     }
 
@@ -210,7 +219,7 @@ public class CouchDbDesign {
 	 * action was taken and the document in the database is up-to-date with the given document.
 	 */
 	public Response synchronizeWithDb(DesignDocument document) {
-		assertNotEmpty(document, "Design Document");
+		assertNotEmpty(document, "Document");
 		DesignDocument documentFromDb = null;
 		try {
 			documentFromDb = getFromDb(document.getId());
@@ -226,7 +235,7 @@ public class CouchDbDesign {
 
 	/**
 	 * Synchronize all design documents from desk to the database.
-	 * @see #synchronizeWithDb
+	 * @see #synchronizeWithDb(DesignDocument)
 	 */
 	public void synchronizeAllWithDb() {
 		List<DesignDocument> documents = getAllFromDesk();
@@ -241,7 +250,7 @@ public class CouchDbDesign {
 	 * @return {@link DesignDocument}
 	 */
 	public DesignDocument getFromDb(String id) {
-		assertNotEmpty(id, "Document id");
+		assertNotEmpty(id, "id");
 		URI uri = builder(dbc.getDBUri()).path(id).build();
 		return dbc.get(uri, DesignDocument.class);
 	}
@@ -253,14 +262,15 @@ public class CouchDbDesign {
 	 * @return {@link DesignDocument}
 	 */
 	public DesignDocument getFromDb(String id, String rev) {
-		assertNotEmpty(id, "Document id");
-		assertNotEmpty(id, "Document rev");
+		assertNotEmpty(id, "id");
+		assertNotEmpty(id, "rev");
 		URI uri = builder(dbc.getDBUri()).path(id).query("rev", rev).build();
 		return dbc.get(uri, DesignDocument.class);
 	}
 
 	/**
 	 * Gets all design documents from desk.
+	 * @see #getFromDesk(String)
 	 */
 	public List<DesignDocument> getAllFromDesk() {
         enumerateDesignResources();
@@ -282,11 +292,11 @@ public class CouchDbDesign {
             throw new IllegalArgumentException("No design document found: " + id);
 
 		DesignDocument dd = new DesignDocument();
-        dd.setId("_design/" + id);
-        dd.setLanguage("javascript");
-        dd.setLists(readFunctions(id, "lists", docLists));
-        dd.setFilters(readFunctions(id, "filters", docFilters));
-        dd.setShows(readFunctions(id, "shows", docShows));
+        dd.setId(DESIGN_PREFIX + id);
+        dd.setLanguage(JAVASCRIPT);
+        dd.setLists(readFunctions(id, LISTS, docLists));
+        dd.setFilters(readFunctions(id, FILTERS, docFilters));
+        dd.setShows(readFunctions(id, SHOWS, docShows));
         List<String> validators = docValidators.get(id);
         if (validators != null && !validators.isEmpty()) {
             if (validators.size() > 1)
@@ -294,8 +304,8 @@ public class CouchDbDesign {
             String name = validators.get(0);
             dd.setValidateDocUpdate(processCodeMacro(id, name, readTextResource(DESIGN_DOCS_DIR + "/" + name)));
         }
-        dd.setViews(readFunctionGroups(id, "views", docViews));
-        dd.setFulltext(readFunctionGroups(id, "fulltext", docFulltext));
+        dd.setViews(readFunctionGroups(id, VIEWS, docViews));
+        dd.setFulltext(readFunctionGroups(id, FULLTEXT, docFulltext));
 		return dd;
 	}
 

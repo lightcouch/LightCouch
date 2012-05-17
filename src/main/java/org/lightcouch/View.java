@@ -100,17 +100,16 @@ public class View {
 	private URIBuilder uriBuilder;
 	
 	View(CouchDbClient dbc, String viewId) {
+		assertNotEmpty(viewId, "View id");
 		this.dbc = dbc;
 		this.gson = dbc.getGson();
-		try {
+		
+		String view = viewId;
+		if(viewId.contains("/")) {
 			String[] v = viewId.split("/");
-			String view = String.format("_design/%s/_view/%s", v[0], v[1]);
-			this.uriBuilder = URIBuilder.builder(dbc.getDBUri()).path(view);
-		} catch (Exception e) {
-			String msg = "Invalid View URI. Expecting a format: design_doc_name/view_name";
-			log.warn(msg);
-			throw new IllegalArgumentException(msg);
+			view = String.format("_design/%s/_view/%s", v[0], v[1]);
 		}
+		this.uriBuilder = URIBuilder.builder(dbc.getDBUri()).path(view);
 	}
 	
 	// ----------------------------------------------- Query options
@@ -179,7 +178,7 @@ public class View {
 				row.setId(JsonToObject(gson, e, "id", String.class));
 				row.setKey(JsonToObject(gson, e, "key", classOfK));
 				row.setValue(JsonToObject(gson, e, "value", classOfV));
-				if(includeDocs == Boolean.TRUE) {
+				if(Boolean.TRUE.equals(this.includeDocs)) {
 					row.setDoc(JsonToObject(gson, e, "doc", classOfT));
 				}
 				vr.getRows().add(row);
