@@ -24,6 +24,8 @@ import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 
 import com.google.gson.Gson;
@@ -35,8 +37,9 @@ import com.google.gson.JsonObject;
  * @author Ahmed Yehia
  */
 final class CouchDbUtil {
+    private static final Log log = LogFactory.getLog(CouchDbUtil.class);
 
-	private CouchDbUtil() {
+    private CouchDbUtil() {
 		// Utility class
 	}
 
@@ -94,11 +97,8 @@ final class CouchDbUtil {
 
 	private static final String LINE_SEP = System.getProperty("line.separator");
 
-    public static String streamToString(InputStream stream) throws IOException {
-        return streamToString(stream, new InputStreamReader(stream));
-    }
-
     public static String streamToString(InputStream stream, String charset) throws IOException {
+        if (stream == null) return null;
         return streamToString(stream, new InputStreamReader(stream, charset));
     }
 
@@ -156,6 +156,8 @@ final class CouchDbUtil {
         InputStream s = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
         if (s == null)
             s = CouchDbUtil.class.getClassLoader().getResourceAsStream(resource);
+        if (s == null && log.isDebugEnabled())
+            log.debug("no resource found on classpath '" + resource + "'");
         return s;
     }
 

@@ -291,7 +291,8 @@ public class CouchDbDesign {
         if (validators != null && !validators.isEmpty()) {
             if (validators.size() > 1)
                 throw new IllegalArgumentException("Expecting exactly one validate_doc_update function file: " + id);
-            dd.setValidateDocUpdate(readTextResource(DESIGN_DOCS_DIR + "/" + validators.get(0)));
+            String name = validators.get(0);
+            dd.setValidateDocUpdate(processCodeMacro(id, name, readTextResource(DESIGN_DOCS_DIR + "/" + name)));
         }
         dd.setViews(readFunctionGroups(id, "views", docViews));
         dd.setFulltext(readFunctionGroups(id, "fulltext", docFulltext));
@@ -302,13 +303,45 @@ public class CouchDbDesign {
         return name.substring(Math.max(name.lastIndexOf("/"), name.lastIndexOf("\\")) + 1, name.lastIndexOf(".js"));
     }
 
+    private static final Pattern codeMacroPattern = Pattern.compile("(//\\s*!code\\s+([\\w\\./-]+)\\s*)$", Pattern.MULTILINE);
+    private String processCodeMacro(String id, String from, String body) {
+        Matcher m = codeMacroPattern.matcher(body);
+        if (!m.find())
+            return body;
+        m.reset();
+        StringBuilder b = new StringBuilder(body.length()*2);
+        int end = 0;
+        while (m.find()) {
+            if (log.isDebugEnabled())
+                log.debug("replacing macro " + m.start() + ":" + m.end() + " " + m.group(2));
+            b.append(body.substring(end, m.start()));
+            String filePath = m.group(2);
+            String macro = readTextResource(DESIGN_DOCS_DIR + "/" + id + "/" + filePath);
+            if (macro == null)
+                macro = readTextResource(DESIGN_DOCS_DIR + "/" + filePath); // global macro
+            if (macro == null)
+                throw new RuntimeException("Code file '" + filePath + "' not found on classpath; referenced by "
+                        + from + " :: '" + m.group(1) + "'");
+            b.append("// ==> " + filePath + "\n");
+            b.append(macro);
+            b.append("\n");
+            b.append("// <== " + filePath + "\n");
+            end = m.end();
+        }
+        b.append(body.substring(end));
+        body = b.toString();
+        if (log.isTraceEnabled())
+            log.trace(from + " after // !code substitutions:\n" + body);
+        return body;
+    }
+
     private Map<String, String> readFunctions(String id, String what, Map<String, List<String>> all) {
         List<String> functions = all.get(id);
         if (functions == null || functions.isEmpty())
             return null;
         Map<String, String> functionsMap = new HashMap<String, String>();
         for (String name : functions)
-            functionsMap.put(basename(name), readTextResource(DESIGN_DOCS_DIR + "/" + name));
+            functionsMap.put(basename(name), processCodeMacro(id, name, readTextResource(DESIGN_DOCS_DIR + "/" + name)));
         return functionsMap;
     }
 
@@ -321,7 +354,7 @@ public class CouchDbDesign {
             List<String> groupFunctions = groups.get(group);
             Map<String, String> functionsMap = new HashMap<String, String>();
             for (String name : groupFunctions)
-                functionsMap.put(basename(name), readTextResource(DESIGN_DOCS_DIR + "/" + name));
+                functionsMap.put(basename(name), processCodeMacro(id, name, readTextResource(DESIGN_DOCS_DIR + "/" + name)));
             groupFunctionsMap.put(group, functionsMap);
         }
         return groupFunctionsMap;
