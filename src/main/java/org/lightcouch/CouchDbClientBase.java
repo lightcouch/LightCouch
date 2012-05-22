@@ -94,6 +94,7 @@ abstract class CouchDbClientBase {
 	private HttpClient httpClient;
 	private URI baseURI;
     private URI dbURI;
+    private URI ftsURI;
 	private Gson gson;
 	private CouchDbConfig config;
 
@@ -325,7 +326,7 @@ abstract class CouchDbClientBase {
                 public void process(
                         final HttpRequest request,
                         final HttpContext context) throws IOException {
-                	if(log.isInfoEnabled()) 
+                	if(log.isInfoEnabled())
         				log.info(">> " + request.getRequestLine());
                 }
             });
