@@ -26,20 +26,21 @@ import com.google.gson.annotations.SerializedName;
  * @author Ahmed Yehia
  */
 public class DesignDocument extends Document {
-	
+
 	private String language;
-	private Map<String, MapReduce> views;
+	private Map<String, Map<String, String>> views;
 	@SerializedName("validate_doc_update")
 	private String validateDocUpdate;
 	private Map<String, String> filters;
 	private Map<String, String> shows;
-	private Map<String, String> lists;
+    private Map<String, String> lists;
+    private Map<String, Map<String, String>> fulltext;
 
 	public String getLanguage() {
 		return language;
 	}
 
-	public Map<String, MapReduce> getViews() {
+	public Map<String, Map<String, String>> getViews() {
 		return views;
 	}
 
@@ -59,11 +60,15 @@ public class DesignDocument extends Document {
 		return lists;
 	}
 
-	public void setLanguage(String language) {
+    public Map<String, Map<String, String>> getFulltext() {
+        return fulltext;
+    }
+
+    public void setLanguage(String language) {
 		this.language = language;
 	}
 
-	public void setViews(Map<String, MapReduce> views) {
+	public void setViews(Map<String, Map<String, String>> views) {
 		this.views = views;
 	}
 
@@ -83,6 +88,10 @@ public class DesignDocument extends Document {
 		this.lists = lists;
 	}
 
+    public void setFulltext(Map<String, Map<String, String>> fulltext) {
+        this.fulltext = fulltext;
+    }
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -93,12 +102,13 @@ public class DesignDocument extends Document {
 		result = prime * result + ((shows == null) ? 0 : shows.hashCode());
 		result = prime * result
 				+ ((validateDocUpdate == null) ? 0 : validateDocUpdate.hashCode());
-		result = prime * result + ((views == null) ? 0 : views.hashCode());
+        result = prime * result + ((views == null) ? 0 : views.hashCode());
+        result = prime * result + ((fulltext == null) ? 0 : fulltext.hashCode());
 		return result;
 	}
 
 	/**
-	 * Indicates whether some other design document is equals to this one. 
+	 * Indicates whether some other design document is equals to this one.
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -139,63 +149,11 @@ public class DesignDocument extends Document {
 				return false;
 		} else if (!views.equals(other.views))
 			return false;
+		if (fulltext == null) {
+			if (other.fulltext != null)
+				return false;
+		} else if (!fulltext.equals(other.fulltext))
+			return false;
 		return true;
 	}
-
-	/**
-	 * Holds Map Reduce functions in a view.
-	 * @author Ahmed Yehia
-	 */
-	public class MapReduce {
-		private String map;
-		private String reduce;
-
-		public String getMap() {
-			return map;
-		}
-
-		public String getReduce() {
-			return reduce;
-		}
-
-		public void setMap(String map) {
-			this.map = map;
-		}
-
-		public void setReduce(String reduce) {
-			this.reduce = reduce;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((map == null) ? 0 : map.hashCode());
-			result = prime * result + ((reduce == null) ? 0 : reduce.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			MapReduce other = (MapReduce) obj;
-			if (map == null) {
-				if (other.map != null)
-					return false;
-			} else if (!map.equals(other.map))
-				return false;
-			if (reduce == null) {
-				if (other.reduce != null)
-					return false;
-			} else if (!reduce.equals(other.reduce))
-				return false;
-			return true;
-		}
-
-	} // /class MapReduce
 }
