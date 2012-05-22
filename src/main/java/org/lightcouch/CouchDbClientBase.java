@@ -83,81 +83,86 @@ import com.google.gson.JsonParseException;
 
 /**
  * Base client class to be extended by a concrete subclass, responsible for establishing
- * a connection with the database and the definition of the basic HTTP request handling and validation. 
+ * a connection with the database and the definition of the basic HTTP request handling and validation.
  * @see CouchDbClient
  * @author Ahmed Yehia
  */
 abstract class CouchDbClientBase {
 
 	private static final Log log = LogFactory.getLog(CouchDbClientBase.class);
-	
+
 	private HttpClient httpClient;
 	private URI baseURI;
-	private URI dbURI;
-	private Gson gson; 
+    private URI dbURI;
+	private Gson gson;
 	private CouchDbConfig config;
-	
+
 	private HttpHost host;
 	private BasicHttpContext context;
-	
+
 	protected CouchDbClientBase() {
 		this(new CouchDbConfig());
 	}
-	
+
 	protected CouchDbClientBase(CouchDbConfig config) {
 		this.httpClient = createHttpClient(config);
 		this.gson = initGson(new GsonBuilder());
 		this.config = config;
 		baseURI = builder().scheme(config.getProtocol()).host(config.getHost()).port(config.getPort()).path("/").build();
 		dbURI   = builder(baseURI).path(config.getDbName()).path("/").build();
+		ftsURI = builder(baseURI).path("_fti/").path("local/").path(config.getDbName()).path("/").build();
 	}
-	
+
 	// ---------------------------------------------- Getters
-	
+
 	/**
 	 * @return The database URI.
 	 */
 	protected URI getDBUri() {
 		return dbURI;
 	}
-	
+
 	protected URI getBaseUri() {
 		return baseURI;
 	}
-	
-	protected Gson getGson() {
+
+    public URI getFtsUri() {
+        return ftsURI;
+    }
+
+    protected Gson getGson() {
 		return gson;
 	}
-	
+
 	protected CouchDbConfig getConfig() {
 		return config;
 	}
-	
+
 	// ------------------------------------------------- HTTP Requests
 	/**
-	 * Performs a HTTP GET request. 
-	 * @return {@link InputStream} 
+	 * Performs a HTTP GET request.
+	 * @return {@link InputStream}
 	 */
 	InputStream get(HttpGet httpGet) {
-		HttpResponse response = executeRequest(httpGet); 
-		try { 
+		HttpResponse response = executeRequest(httpGet);
+		try {
 			return response.getEntity().getContent();
 		} catch (Exception e) {
 			log.error("Error reading response. " + e.getMessage());
 			throw new CouchDbException(e);
 		}
 	}
-	
+
 	/**
-	 * Performs a HTTP GET request. 
-	 * @return {@link InputStream} 
+	 * Performs a HTTP GET request.
+	 * @return {@link InputStream}
 	 */
 	InputStream get(URI uri) {
 		return get(new HttpGet(uri));
 	}
-	
+
 	/**
-	 * Performs a HTTP GET request. 
+	 * Performs a HTTP GET request.
 	 * @return An object of type T
 	 */
 	<T> T get(URI uri, Class<T> classType) {
@@ -169,15 +174,15 @@ abstract class CouchDbClientBase {
 			close(instream);
 		}
 	}
-	
+
 	/**
-	 * Performs a HTTP HEAD request. 
+	 * Performs a HTTP HEAD request.
 	 * @return {@link HttpResponse}
 	 */
 	HttpResponse head(URI uri) {
 		return executeRequest(new HttpHead(uri));
 	}
-	
+
 	/**
 	 * Performs a HTTP PUT request, saves or updates a document.
 	 * @return {@link Response}
@@ -185,7 +190,7 @@ abstract class CouchDbClientBase {
 	Response put(URI uri, Object object, boolean newEntity) {
 		assertNotEmpty(object, "object");
 		HttpResponse response = null;
-		try {  
+		try {
 			JsonObject json = objectToJson(getGson(), object);
 			String id = getElement(json, "_id");
 			String rev = getElement(json, "_rev");
@@ -198,13 +203,13 @@ abstract class CouchDbClientBase {
 			}
 			HttpPut put = new HttpPut(builder(uri).path(id).build());
 			setEntity(put, json.toString());
-			response = executeRequest(put); 
+			response = executeRequest(put);
 			return getResponse(response);
 		} finally {
 			close(response);
 		}
 	}
-	
+
 	/**
 	 * Performs a HTTP PUT request, saves an attachment.
 	 * @return {@link Response}
@@ -222,7 +227,7 @@ abstract class CouchDbClientBase {
 			close(response);
 		}
 	}
-	
+
 	/**
 	 * Performs a HTTP POST request.
 	 * @return {@link HttpResponse}
@@ -232,7 +237,7 @@ abstract class CouchDbClientBase {
 		setEntity(post, json);
 		return executeRequest(post);
 	}
-	
+
 	/**
 	 * Performs a HTTP DELETE request.
 	 * @return {@link Response}
@@ -241,13 +246,13 @@ abstract class CouchDbClientBase {
 		HttpResponse response = null;
 		try {
 			HttpDelete delete = new HttpDelete(uri);
-			response = executeRequest(delete); 
+			response = executeRequest(delete);
 			return getResponse(response);
 		} finally {
 			close(response);
 		}
 	}
-	
+
 	/**
 	 * Executes a HTTP request.
 	 * @param request The HTTP request to execute.
@@ -261,12 +266,12 @@ abstract class CouchDbClientBase {
 			request.abort();
 			log.error("Error executing request. " + e.getMessage());
 			throw new CouchDbException(e);
-		} 
+		}
 		return response;
 	}
-	
+
 	// ----------------------------------------------- Helpers
-	
+
 	/**
 	 * @return {@link DefaultHttpClient} instance.
 	 */
@@ -288,8 +293,8 @@ abstract class CouchDbClientBase {
 				};
 				SSLContext sslcontext = SSLContext.getInstance("TLS");
 				sslcontext.init(null, new TrustManager[] { trustManager }, null);
-				ssf = new SSLSocketFactory(sslcontext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER); 
-				SSLSocket socket = (SSLSocket) ssf.createSocket(null); 
+				ssf = new SSLSocketFactory(sslcontext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+				SSLSocket socket = (SSLSocket) ssf.createSocket(null);
 				socket.setEnabledCipherSuites(new String[] { "SSL_RSA_WITH_RC4_128_MD5" });
 			} else {
 				ssf = PlainSocketFactory.getSocketFactory();
@@ -340,7 +345,7 @@ abstract class CouchDbClientBase {
 		}
 		return httpclient;
 	}
-	
+
 	/**
 	 * Validates a HTTP response; on error cases logs status and throws relevant exceptions.
 	 * @param response The HTTP response.
@@ -349,11 +354,11 @@ abstract class CouchDbClientBase {
 		int code = response.getStatusLine().getStatusCode();
 		if(code == 200 || code == 201 || code == 202) { // success (ok | created | accepted)
 			return;
-		} 
+		}
 		String msg = format("<< Status: %s (%s) ", code, response.getStatusLine().getReasonPhrase());
 		switch (code) {
 		case HttpStatus.SC_NOT_FOUND: {
-			log.info(msg); 
+			log.info(msg);
 			throw new NoDocumentException(msg);
 		}
 		case HttpStatus.SC_CONFLICT: {
@@ -366,7 +371,7 @@ abstract class CouchDbClientBase {
 		}
 		}
 	}
-	
+
 	/**
 	 * @param response The {@link HttpResponse}
 	 * @return {@link Response}
@@ -375,12 +380,12 @@ abstract class CouchDbClientBase {
 		try {
 			Reader reader = new InputStreamReader(response.getEntity().getContent());
 			return getGson().fromJson(reader, Response.class);
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			log.error("Error reading response. " + e.getMessage());
 			throw new CouchDbException(e.getMessage(), e);
-		} 
+		}
 	}
-	
+
 	/**
 	 * Sets a JSON String as a request entity.
 	 * @param httpRequest The request to set entity.
@@ -396,7 +401,7 @@ abstract class CouchDbClientBase {
 			throw new IllegalArgumentException(e);
 		}
 	}
-	
+
 	/**
 	 * <p>The supplied {@link GsonBuilder} is used to create a new {@link Gson} instance.
 	 * Useful for registering custom serializers/deserializers, for example JodaTime DateTime class.
@@ -404,7 +409,7 @@ abstract class CouchDbClientBase {
 	protected void setGsonBuilder(GsonBuilder gsonBuilder) {
 		this.gson = initGson(gsonBuilder);
 	}
-	
+
 	/**
 	 * Builds {@link Gson} and registers any required serializer/deserializer.
 	 * @return {@link Gson} instance
@@ -419,7 +424,7 @@ abstract class CouchDbClientBase {
 		});
 		return gsonBuilder.create();
 	}
-	
+
 	/**
 	 * Shuts down the connection manager used by this client instance.
 	 */
