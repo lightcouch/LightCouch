@@ -169,7 +169,7 @@ public class CouchDbDesign {
 			File viewsRootDir = new File(designDoc, "views");
 			views = new HashMap<String, MapReduce>();
 			for (String viewDirName : viewsRootDir.list()) { // view dirs
-				MapReduce mr = dd.new MapReduce();
+				MapReduce mr = new MapReduce();
 				File viewDir = new File(viewsRootDir, viewDirName);
 				String map = null;
 				String reduce = null;
