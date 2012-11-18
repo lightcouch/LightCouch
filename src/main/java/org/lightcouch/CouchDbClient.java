@@ -152,6 +152,13 @@ public final class CouchDbClient extends CouchDbClientBase {
 	}
 	
 	/**
+	 * Provides access to the temporary View APIs.
+	 */
+	public View tempView(String map, String reduce) {
+		return new View(this, map, reduce);
+	}
+	
+	/**
 	 * Provides access to the replication APIs.
 	 */
 	public Replication replication() {

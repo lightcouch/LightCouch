@@ -29,6 +29,7 @@ import java.util.List;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -98,6 +99,7 @@ public class View {
 	private Gson gson;
 	
 	private URIBuilder uriBuilder;
+	private DesignDocument.MapReduce tempMapReduce;
 	
 	View(CouchDbClient dbc, String viewId) {
 		this.dbc = dbc;
@@ -113,6 +115,22 @@ public class View {
 		}
 	}
 	
+	View(CouchDbClient dbc, String map, String reduce) {
+		this.dbc = dbc;
+		this.gson = dbc.getGson();
+		try {
+			String view = "_temp_view";
+			this.uriBuilder = URIBuilder.builder(dbc.getDBUri()).path(view);
+		} catch (Exception e) {
+			String msg = "Invalid View URI. Expecting a format: design_doc_name/view_name";
+			log.warn(msg);
+			throw new IllegalArgumentException(msg);
+		}
+		this.tempMapReduce = new DesignDocument.MapReduce();
+		this.tempMapReduce.setMap(map);
+		this.tempMapReduce.setReduce(reduce);
+	}
+	
 	// ----------------------------------------------- Query options
 	
 	/**
@@ -122,7 +140,14 @@ public class View {
 	 */
 	public InputStream queryForStream() {
 		URI uri = uriBuilder.build();
-		return dbc.get(uri);
+		if (this.tempMapReduce == null)
+			return dbc.get(uri);
+		try {
+			return dbc.post(uri, gson.toJson(this.tempMapReduce)).getEntity().getContent();
+		} catch (Exception e) {
+			log.error("Error reading response. " + e.getMessage());
+			throw new CouchDbException(e);
+		}
 	}
 	
 	/**
