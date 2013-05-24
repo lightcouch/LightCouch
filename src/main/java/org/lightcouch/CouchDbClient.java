@@ -62,7 +62,7 @@ import com.google.gson.JsonObject;
  * <pre>
  *  Foo foo = dbClient.find(Foo.class, "some-id");
  * </pre>
- * 
+ *
  * <p>Design documents API under the context <tt>design()</tt> {@link CouchDbDesign} contains usage example.
  * 
  * <p>View APIs under the context <tt>view()</tt> {@link View} contains usage examples.
@@ -191,7 +191,6 @@ public final class CouchDbClient extends CouchDbClientBase {
 	public void syncDesignDocsWithDb() {
 		design().synchronizeAllWithDb();
 	}
-	
 	/**
 	 * Finds an Object of the specified type.
 	 * @param <T> Object type.
@@ -203,7 +202,8 @@ public final class CouchDbClient extends CouchDbClientBase {
 	public <T> T find(Class<T> classType, String id) {
 		assertNotEmpty(classType, "Class Type");
 		assertNotEmpty(id, "id");
-		return get(builder(getDBUri()).path(id).build(), classType);
+        URIBuilder builder = builder(getDBUri()).path(id);
+		return get(builder.build(), classType);
 	}
 	
 	/**
@@ -235,8 +235,18 @@ public final class CouchDbClient extends CouchDbClientBase {
 		assertNotEmpty(uri, "uri");
 		return get(URI.create(uri), classType);
 	}
-	
-	/**
+
+    public <T> T findRevisions(Class<T> classType, String id, String since) {
+        assertNotEmpty(id, "id");
+        URIBuilder builder = builder(getDBUri()).path(id).query("revs", "true");
+        if(since != null) {
+            builder.query("atts_since", "[\"" + since + "\"]");
+        }
+
+        return get(builder.build(), classType);
+    }
+
+    /**
 	 * <p>Finds a document and returns the result as an {@link InputStream}.</p>
 	 * The stream should be properly closed after usage, as to avoid connection leaks.
 	 * @param id The document id.
@@ -248,6 +258,16 @@ public final class CouchDbClient extends CouchDbClientBase {
 		assertNotEmpty(id, "id");
 		return get(builder(getDBUri()).path(id).build());
 	}
+
+    public InputStream findRevisions(String id, String since) {
+        assertNotEmpty(id, "id");
+        assertNotEmpty(since, "since");
+        URIBuilder builder = builder(getDBUri()).path(id).query("revs", "true");
+        if(since != null) {
+            builder.query("since", since);
+        }
+        return get(builder.build());
+    }
 	
 	/**
 	 * <p>Finds a document given an id and revision, returns the result as {@link InputStream}.</p>
@@ -312,13 +332,19 @@ public final class CouchDbClient extends CouchDbClientBase {
 	 * @param allOrNothing Indicated whether the request has all-or-nothing semantics.
 	 * @return {@code List<Response>} Containing the resulted entries.
 	 */
-	public List<Response> bulk(List<?> objects, boolean allOrNothing) {
+
+    public List<Response> bulk(List<?> objects, boolean allOrNothing) {
+        return bulk(objects, allOrNothing, true);
+    }
+
+    public List<Response> bulk(List<?> objects, boolean allOrNothing, boolean newEdits) {
 		assertNotEmpty(objects, "objects");
 		HttpResponse response = null;
 		try { 
 			String allOrNothingVal = allOrNothing ? "\"all_or_nothing\": true, " : "";
+            String newEditsVal = !newEdits ? "\"new_edits\": false, " : "";
 			URI uri = builder(getDBUri()).path("_bulk_docs").build();
-			String json = String.format("{%s%s%s}", allOrNothingVal, "\"docs\": ", getGson().toJson(objects));
+			String json = String.format("{%s%s%s%s}", allOrNothingVal, newEditsVal, "\"docs\": ", getGson().toJson(objects));
 			response = post(uri, json);
 			return getResponseList(response);
 		} finally {

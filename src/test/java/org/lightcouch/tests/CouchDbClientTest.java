@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import junit.framework.Assert;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -52,12 +53,13 @@ import org.lightcouch.ViewResult;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import sun.misc.IOUtils;
 
 /**
  * Database integration tests.
  * @author Ahmed Yehia
  */
-public class CouchDbClientTest {
+public class    CouchDbClientTest {
 	
 	private static CouchDbClient dbClient;
 	private static CouchDbClient dbClient2;
@@ -85,7 +87,7 @@ public class CouchDbClientTest {
 		// empty or null arguments
 		dbClient.find(Foo.class, ""); 
 	}
-	
+
 	@Test(expected=NoDocumentException.class)
 	public void testFindThrowsNoDocumentException() {
 		// id value of a new UUID should never be found
@@ -124,6 +126,36 @@ public class CouchDbClientTest {
 		assertTrue(inputStream.read() != -1);
 		inputStream.close();
 	}
+
+    @Test
+    public void testFindRevisions() throws  Exception {
+        System.out.println("------------------------------- Testing find() with Revisions");
+
+        // save a new doc and obtain the response
+        Response resp = dbClient.save(new Bar());
+        Bar foo_rev_0 = dbClient.find(Bar.class, resp.getId());
+        System.out.println(foo_rev_0.getRevision());
+
+        Response response_0 = dbClient.update(foo_rev_0);
+        Bar foo_rev_1 = dbClient.find(Bar.class, resp.getId());
+        System.out.println(foo_rev_1.getRevision());
+
+        Response response_1 = dbClient.update(foo_rev_1);
+        Bar foo_rev_2 = dbClient.find(Bar.class, resp.getId());
+        System.out.println(foo_rev_2.getRevision());
+
+        Response response_2 = dbClient.update(foo_rev_2);
+        Bar foo_rev_3 = dbClient.find(Bar.class, resp.getId());
+        System.out.println(foo_rev_3.getRevision());
+
+        Map<String, Object> doc = dbClient.findRevisions(Map.class, resp.getId(), foo_rev_2.getRevision());
+        Map<String, Object> revisions = (Map<String, Object>) doc.get("_revisions");
+        List<String> ids = (List<String>) revisions.get("ids");
+        Assert.assertEquals(4, ((Double)revisions.get("start")).intValue());
+        Assert.assertEquals(4, ids.size());
+        System.out.println(ids);
+
+    }
 	
 	@Test
 	public void testContains() {
@@ -226,8 +258,33 @@ public class CouchDbClientTest {
 		List<JsonObject> allDocs = dbClient.view("_all_docs").query(JsonObject.class);
 		assertThat(allDocs.size(), not(0));
 	}
-	
-	@Test
+
+    @Test
+    public void testBulkDocumentsNoNewEdits() {
+        System.out.println("------------------------------- Testing Bulk Documents with new_edits option = true");
+        // Bulk - Modify docs
+        List<Object> newDocs = new ArrayList<Object>();
+        Foo foo = new Foo();
+        foo.set_id("my_foo");
+        foo.set_rev("1-kadfajsfuwoerj");
+        newDocs.add(foo);
+
+        JsonObject jo = new JsonObject();
+        jo.addProperty("_id", "my_jsonObject");
+        jo.addProperty("_rev", "1-oofabdshnkefnwi");
+        newDocs.add(jo);
+
+        List<Response> responses = dbClient.bulk(newDocs, true, false);
+        Assert.assertNotNull(responses);
+
+        Foo fooRes = dbClient.find(Foo.class, foo.get_id());
+        Assert.assertEquals(foo.get_rev(), fooRes.get_rev());
+
+        Map joRes = dbClient.find(Map.class, jo.get("_id").getAsString());
+        Assert.assertEquals(jo.get("_rev").getAsString(), joRes.get("_rev"));
+    }
+
+    @Test
 	public void testUpdateHandler() {
 	        System.out.println("------------------------------- Testing Update Handler");
 	        dbClient.syncDesignDocsWithDb();

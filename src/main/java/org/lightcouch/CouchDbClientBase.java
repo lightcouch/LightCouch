@@ -259,7 +259,15 @@ abstract class CouchDbClientBase {
 	protected HttpResponse executeRequest(HttpRequestBase request) {
 		HttpResponse response = null;
 		try {
-			response = httpClient.execute(host, request, context);
+            if(log.isTraceEnabled()) {
+                logHttpRequest(request);
+            }
+
+            response = httpClient.execute(host, request, context);
+
+            if(log.isTraceEnabled()) {
+                logHttpResponse(response);
+            }
 		} catch (IOException e) {
 			request.abort();
 			log.error("Error executing request. " + e.getMessage());
@@ -267,8 +275,17 @@ abstract class CouchDbClientBase {
 		} 
 		return response;
 	}
-	
-	// Helpers
+
+    private void logHttpRequest(HttpRequestBase request) {
+        log.trace("Executing request: " + request );
+
+    }
+
+    private void logHttpResponse(HttpResponse response) {
+        log.trace("Response: " + response);
+    }
+
+    // Helpers
 	
 	/**
 	 * @return {@link DefaultHttpClient} instance.
