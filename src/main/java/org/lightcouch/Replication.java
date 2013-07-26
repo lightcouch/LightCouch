@@ -21,8 +21,8 @@ import static org.lightcouch.URIBuilder.builder;
 
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
 
+import ch.boye.httpclientandroidlib.HttpResponse;
 import com.google.gson.JsonObject;
 
 /**

@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpGet;
+import ch.boye.httpclientandroidlib.client.methods.HttpGet;
 import org.lightcouch.ChangesResult.Row;
 
 import com.google.gson.Gson;

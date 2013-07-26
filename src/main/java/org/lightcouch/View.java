@@ -27,9 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ch.boye.httpclientandroidlib.androidextra.HttpClientAndroidLog;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.lightcouch.DesignDocument.MapReduce;
 
 import com.google.gson.Gson;
@@ -67,8 +66,9 @@ import com.google.gson.JsonParser;
  * @author Ahmed Yehia
  */
 public class View {
-	private static final Log log = LogFactory.getLog(View.class);
-	
+
+    static final HttpClientAndroidLog log = new HttpClientAndroidLog(View.class);
+
 	// paging param fields
 	private static final String START_KEY                = "s_k";
 	private static final String START_KEY_DOC_ID         = "s_k_d_i";

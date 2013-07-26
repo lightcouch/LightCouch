@@ -26,11 +26,10 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPut;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.androidextra.HttpClientAndroidLog;
 
+import ch.boye.httpclientandroidlib.client.methods.HttpPut;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
@@ -40,7 +39,7 @@ import com.google.gson.reflect.TypeToken;
  */
 public class CouchDbContext {
 
-	private static final Log log = LogFactory.getLog(CouchDbContext.class);
+    static final HttpClientAndroidLog log = new HttpClientAndroidLog(CouchDbContext.class);
 
 	private CouchDbClient dbc;
 

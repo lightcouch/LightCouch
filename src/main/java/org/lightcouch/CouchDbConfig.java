@@ -16,21 +16,23 @@
 
 package org.lightcouch;
 
+import ch.boye.httpclientandroidlib.androidextra.HttpClientAndroidLog;
+
 import static org.lightcouch.CouchDbUtil.*;
 
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Provides configuration to client instance.
  * @author Ahmed Yehia
  */
 class CouchDbConfig {
-	private static final Log log = LogFactory.getLog(CouchDbConfig.class);
-	private static final String DEFAULT_FILE = "couchdb.properties";
+
+    static final HttpClientAndroidLog log = new HttpClientAndroidLog(CouchDbConfig.class);
+
+    private static final String DEFAULT_FILE = "couchdb.properties";
 	
 	private Properties properties = new Properties();
 	private String configFile;

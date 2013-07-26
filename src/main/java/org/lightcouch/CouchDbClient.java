@@ -23,8 +23,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPut;
+import ch.boye.httpclientandroidlib.HttpResponse;
+import ch.boye.httpclientandroidlib.client.methods.HttpPut;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;

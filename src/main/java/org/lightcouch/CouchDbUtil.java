@@ -34,7 +34,7 @@ import java.util.UUID;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.apache.http.HttpResponse;
+import ch.boye.httpclientandroidlib.HttpResponse;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -99,7 +99,6 @@ final class CouchDbUtil {
 	 * Works for regular files and also JARs.
 	 * 
 	 * @author Greg Briggs
-	 * @param clazz Any java class that lives in the same place as the resources you want.
 	 * @param path Should end with "/", but not start with one.
 	 * @return Just the name of each member item, not the full paths.
 	 */
