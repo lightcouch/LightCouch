@@ -237,13 +237,17 @@ public final class CouchDbClient extends CouchDbClientBase {
 	}
 
     public <T> T findRevisions(Class<T> classType, String id, String since) {
-        assertNotEmpty(id, "id");
-        URIBuilder builder = builder(getDBUri()).path(id).query("revs", "true");
-        if(since != null) {
-            builder.query("atts_since", "[\"" + since + "\"]");
-        }
+        try {
+            assertNotEmpty(id, "id");
+            URIBuilder builder = builder(getDBUri()).path(id).query("revs", "true");
+            if (since != null) {
+                builder.query("atts_since", "[\"" + since + "\"]");
+            }
 
-        return get(builder.build(), classType);
+            return get(builder.build(), classType);
+        } catch (CouchDbException e) {
+            throw new CouchDbException("Error findVersion() for document id:" + id + ", since: " + since, e);
+        }
     }
 
     /**
