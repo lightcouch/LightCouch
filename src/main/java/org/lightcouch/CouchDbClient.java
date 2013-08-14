@@ -237,9 +237,19 @@ public final class CouchDbClient extends CouchDbClientBase {
 	}
 
     public <T> T findRevisions(Class<T> classType, String id, String since) {
+        return findRevisions(classType, id, null, since);
+    }
+
+    /**
+     * TODO: for deleted document, we need to provide the last "rev" to get the revision history
+     */
+    public <T> T findRevisions(Class<T> classType, String id, String rev, String since) {
         try {
             assertNotEmpty(id, "id");
             URIBuilder builder = builder(getDBUri()).path(id).query("revs", "true");
+            if(rev != null) {
+                builder.query("rev", rev);
+            }
             if (since != null) {
                 builder.query("atts_since", "[\"" + since + "\"]");
             }
