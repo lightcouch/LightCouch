@@ -136,10 +136,25 @@ public class View {
 		if(tempView != null) { // temp view
 			return dbc.getStream(dbc.post(uri, gson.toJson(tempView)));
 		}
-		
 		return dbc.get(uri);
 	}
 	
+	/**
+     * Queries a view as an {@link InputStream}
+     * <p>The stream should be properly closed after usage, as to avoid connection leaks.
+     * @return The result as an {@link InputStreamReader}.
+     */
+    public InputStreamReader queryForStreamReader() {
+		URI uri = uriBuilder.build();
+		if(allDocsKeys != null) { // bulk docs
+			return dbc.getStreamReader(dbc.post(uri, allDocsKeys));
+		}
+		if(tempView != null) { // temp view
+			return dbc.getStreamReader(dbc.post(uri, gson.toJson(tempView)));
+		}
+		
+		return dbc.getReader(uri);
+	}
 	/**
 	 * Queries a view.
 	 * @param <T> Object type T
@@ -149,7 +164,7 @@ public class View {
 	public <T> List<T> query(Class<T> classOfT) {
 		InputStream instream = null;
 		try {  
-			Reader reader = new InputStreamReader(instream = queryForStream());
+			Reader reader = queryForStreamReader();
 			JsonArray jsonArray = new JsonParser().parse(reader)
 					.getAsJsonObject().getAsJsonArray("rows");
 			List<T> list = new ArrayList<T>();
@@ -179,7 +194,7 @@ public class View {
 	public <K, V, T> ViewResult<K, V, T> queryView(Class<K> classOfK, Class<V> classOfV, Class<T> classOfT) {
 		InputStream instream = null;
 		try {  
-			Reader reader = new InputStreamReader(instream = queryForStream());
+			Reader reader = queryForStreamReader();
 			JsonObject json = new JsonParser().parse(reader).getAsJsonObject(); 
 			ViewResult<K, V, T> vr = new ViewResult<K, V, T>();
 			vr.setTotalRows(getElementAsLong(json, "total_rows")); 
@@ -200,7 +215,8 @@ public class View {
 				vr.getRows().add(row);
 			}
 			return vr;
-		} finally {
+        }
+        finally {
 			close(instream);
 		}
 	}
@@ -239,7 +255,7 @@ public class View {
 	private <V> V queryValue(Class<V> classOfV) {
 		InputStream instream = null;
 		try {  
-			Reader reader = new InputStreamReader(instream = queryForStream());
+			Reader reader = queryForStreamReader();
 			JsonArray array = new JsonParser().parse(reader).
 							getAsJsonObject().get("rows").getAsJsonArray();
 			if(array.size() != 1) { // expect exactly 1 row

@@ -122,7 +122,7 @@ public class Replicator {
 		InputStream instream = null;
 		try {  
 			URI uri = builder(dbURI).path("_all_docs").query("include_docs", "true").build();
-			Reader reader = new InputStreamReader(instream = dbc.get(uri));
+			Reader reader = dbc.getReader(uri);
 			JsonArray jsonArray = new JsonParser().parse(reader)
 					.getAsJsonObject().getAsJsonArray("rows");
 			List<ReplicatorDocument> list = new ArrayList<ReplicatorDocument>();

@@ -95,8 +95,7 @@ public class CouchDbContext {
 		InputStream instream = null;
 		try {
 			Type typeOfList = new TypeToken<List<String>>() {}.getType();
-			instream = dbc.get(builder(dbc.getBaseUri()).path("_all_dbs").build());
-			Reader reader = new InputStreamReader(instream);
+			Reader reader = dbc.getReader(builder(dbc.getBaseUri()).path("_all_dbs").build());
 			return dbc.getGson().fromJson(reader, typeOfList);
 		} finally {
 			close(instream);
@@ -117,8 +116,7 @@ public class CouchDbContext {
 	public String serverVersion() {
 		InputStream instream = null;
 		try {
-			instream = dbc.get(builder(dbc.getBaseUri()).build());
-			Reader reader = new InputStreamReader(instream);
+			Reader reader = dbc.getReader(builder(dbc.getBaseUri()).build());
 			return getElement(new JsonParser().parse(reader).getAsJsonObject(), "version");
 		} finally {
 			close(instream);

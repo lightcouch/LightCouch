@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -45,6 +46,7 @@ import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
@@ -167,6 +169,24 @@ abstract class CouchDbClientBase {
 	
 	/**
 	 * Performs a HTTP GET request. 
+     * @return {@link InputStreamReader}
+     */
+	InputStreamReader getReader(HttpGet httpGet) {
+		HttpResponse response = executeRequest(httpGet);
+        return new InputStreamReader(getStream(response), getCharset(response) );
+	}
+
+    /**
+     * Performs a HTTP GET request.
+     * @return {@link InputStreamReader}
+     */
+	InputStreamReader getReader(URI uri) {
+		HttpGet get = new HttpGet(uri);
+		return getReader(get);
+	}
+	
+	/**
+	 * Performs a HTTP GET request. 
 	 * @return An object of type T
 	 */
 	<T> T get(URI uri, Class<T> classType) {
@@ -192,6 +212,7 @@ abstract class CouchDbClientBase {
 	 * @return {@link Response}
 	 */
 	Response put(URI uri, Object object, boolean newEntity) {
+
 		assertNotEmpty(object, "object");
 		HttpResponse response = null;
 		try {  
@@ -405,7 +426,7 @@ abstract class CouchDbClientBase {
 	 */
 	List<Response> getResponseList(HttpResponse response) throws CouchDbException {
 		InputStream instream = getStream(response);
-		Reader reader = new InputStreamReader(instream);
+		Reader reader = new InputStreamReader(instream, getCharset(response));
 		return getGson().fromJson(reader, new TypeToken<List<Response>>(){}.getType());
 	}
 	
@@ -437,8 +458,25 @@ abstract class CouchDbClientBase {
 		}
 	}
 	
+    /**
+     * @return {@link Charset} from a {@link HttpResponse} or {@link ContentType} APPLICATION_JSON
+     */
+    Charset getCharset(HttpResponse response) {
+        Charset cs = ContentType.getOrDefault(response.getEntity()).getCharset();
+        return (cs != null) ? cs : ContentType.APPLICATION_JSON.getCharset();
+	}
+	
+	InputStreamReader getStreamReader(HttpResponse response) {
+		try {
+			return new InputStreamReader(getStream(response), getCharset(response));
+		} catch (Exception e) {
+			log.error("Error reading response. " + e.getMessage());
+			throw new CouchDbException(e);
+		}
+	}
+
 	<T> T deserialize(InputStream instream, Class<T> classType) {
-		Reader reader = new InputStreamReader(instream);
+            Reader reader = new InputStreamReader(instream, ContentType.APPLICATION_JSON.getCharset());
 		return getGson().fromJson(reader, classType);
 	}
 	
