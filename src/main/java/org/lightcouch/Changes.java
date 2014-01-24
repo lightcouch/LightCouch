@@ -17,7 +17,6 @@
 package org.lightcouch;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 
@@ -81,8 +80,7 @@ public class Changes {
 	public Changes continuousChanges() {
 		URI uri = uriBuilder.query("feed", "continuous").build();
 		httpGet = new HttpGet(uri);
-		InputStream in = dbc.get(httpGet);
-		InputStreamReader is = new InputStreamReader(in);
+		InputStreamReader is = dbc.getReader(httpGet);
 		setReader(new BufferedReader(is));
 		return this;
 	}
