@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.security.cert.CertificateException;
@@ -414,18 +413,13 @@ abstract class CouchDbClientBase {
 	 * @param httpRequest The request to set entity.
 	 * @param json The JSON String to set.
 	 */
-	protected void setEntity(HttpEntityEnclosingRequestBase httpRequest, String json) {
-		try {
-			StringEntity entity = new StringEntity(json, "UTF-8");
-			entity.setContentType("application/json");
-			httpRequest.setEntity(entity);
-		} catch (UnsupportedEncodingException e) {
-			log.error("Error setting request data. " + e.getMessage());
-			throw new IllegalArgumentException(e);
-		}
-	}
-	
-	/**
+    protected void setEntity(HttpEntityEnclosingRequestBase httpRequest, String json) {
+        StringEntity entity = new StringEntity(json, "UTF-8");
+        entity.setContentType("application/json");
+        httpRequest.setEntity(entity);
+    }
+
+    /**
 	 * @return {@link InputStream} from a {@link HttpResponse}
 	 */
 	InputStream getStream(HttpResponse response) {
