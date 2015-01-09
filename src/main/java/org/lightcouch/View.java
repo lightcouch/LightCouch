@@ -186,9 +186,6 @@ public class View {
 			vr.setOffset(getAsInt(json, "offset"));
 			vr.setUpdateSeq(getAsLong(json, "update_seq"));
 			JsonArray jsonArray = json.getAsJsonArray("rows");
-			if(jsonArray.size() == 0) { // validate available rows
-				throw new NoDocumentException("No result was returned by this view query.");
-			}
 			for (JsonElement e : jsonArray) {
 				ViewResult<K, V, T>.Rows row = vr.new Rows();
 				row.setId(JsonToObject(gson, e, "id", String.class));
