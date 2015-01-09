@@ -192,8 +192,12 @@ public class View {
 			for (JsonElement e : jsonArray) {
 				ViewResult<K, V, T>.Rows row = vr.new Rows();
 				row.setId(JsonToObject(gson, e, "id", String.class));
-				row.setKey(JsonToObject(gson, e, "key", classOfK));
-				row.setValue(JsonToObject(gson, e, "value", classOfV));
+				if (classOfK != null) {
+				    row.setKey(JsonToObject(gson, e, "key", classOfK));
+				}
+				if (classOfV != null) {
+				    row.setValue(JsonToObject(gson, e, "value", classOfV));
+				}
 				if(Boolean.TRUE.equals(this.includeDocs)) {
 					row.setDoc(JsonToObject(gson, e, "doc", classOfT));
 				}
