@@ -34,11 +34,11 @@ class URIBuilder {
 	private String host;
 	private int port;
 	private String path = "";
-	private String pathToEncode = "";
 	/* The final query */
 	private final StringBuilder query = new StringBuilder();
 	/* key=value params */
 	private final List<String> qParams = new ArrayList<String>();
+	private boolean uriEncoded = false;
 
 	public static URIBuilder buildUri() {
 		return new URIBuilder();
@@ -51,30 +51,12 @@ class URIBuilder {
 	}
 
 	public URI build() {
-		try {
-			for (int i = 0; i < qParams.size(); i++) {
-				String amp = (i != qParams.size() - 1) ? "&" : "";
-				query.append(qParams.get(i) + amp);
-			}
-			String q = (query.length() == 0) ? null : query.toString();
-			return new URI(scheme, null, host, port, path, q, null);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-	
-	public URI buildEncoded() {
-		for (int i = 0; i < qParams.size(); i++) {
-			String amp = (i != qParams.size() - 1) ? "&" : "";
-			query.append(qParams.get(i) + amp);
-		}
-		try {
-			String q = (query.length() == 0) ? "" : "?" + query;
-			String uri = String.format("%s://%s:%s%s%s%s", new Object[]{scheme, host, port, path, pathToEncode, q});
-			return new URI(uri);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		} 
+		prepareQuery();
+		
+		if(uriEncoded)
+			return createUriEncoded();
+		else
+			return createUri();
 	}
 
 	public URIBuilder scheme(String scheme) {
@@ -97,11 +79,16 @@ class URIBuilder {
 		return this;
 	}
 	
-	public URIBuilder pathToEncode(String path) {
-		try {
-			pathToEncode = URLEncoder.encode(path, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException(e);
+	public URIBuilder path(String path, boolean encode) {
+		if (encode) {
+			this.uriEncoded = true;
+			try {
+				this.path += URLEncoder.encode(path, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new IllegalArgumentException(e);
+			}
+		} else {
+			path(path);
 		}
 		return this;
 	}
@@ -122,6 +109,34 @@ class URIBuilder {
 		if (params.getParams() != null)
 			this.qParams.addAll(params.getParams());
 		return this;
+	}
+	
+	// private
+	
+	private URI createUri() {
+		try {
+			String q = (query.length() == 0) ? null : query.toString();
+			return new URI(scheme, null, host, port, path, q, null);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private URI createUriEncoded() {
+		try {
+			String q = (query.length() == 0) ? "" : "?" + query;
+			String uri = String.format("%s://%s:%s%s%s", new Object[]{scheme, host, port, path, q});
+			return new URI(uri);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private void prepareQuery() {
+		for (int i = 0; i < qParams.size(); i++) {
+			String amp = (i != qParams.size() - 1) ? "&" : "";
+			query.append(qParams.get(i) + amp);
+		}
 	}
 	
 }
