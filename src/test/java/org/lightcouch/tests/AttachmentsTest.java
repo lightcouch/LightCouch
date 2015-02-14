@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
 import org.junit.AfterClass;
@@ -74,7 +75,7 @@ public class AttachmentsTest {
 		String base64Data = bar2.getAttachments().get("txt_1.txt").getData();
 		assertNotNull(base64Data);
 	}
-
+	
 	@Test
 	public void attachmentStandalone() throws IOException {
 		byte[] bytesToDB = "binary data".getBytes();
@@ -93,5 +94,41 @@ public class AttachmentsTest {
 		byte[] bytesFromDB = bytesOut.toByteArray();
 
 		assertArrayEquals(bytesToDB, bytesFromDB);
+	}
+	
+	@Test
+	public void standaloneAttachment_newDocumentGivenId() throws IOException {
+		byte[] bytesToDB = "binary data".getBytes();
+		ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytesToDB);
+		
+		String docId = generateUUID();
+		
+		dbClient.saveAttachment(bytesIn, "foo.txt", "text/plain", docId, null);
+	}
+	
+	@Test
+	public void standaloneAttachment_existingDocument() throws IOException {
+		byte[] bytesToDB = "binary data".getBytes();
+		ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytesToDB);
+		
+		Response respSave = dbClient.save(new Foo());
+		
+		dbClient.saveAttachment(bytesIn, "foo.txt", "text/plain", respSave.getId(), respSave.getRev());
+	}
+	
+	@Test
+	public void standaloneAttachment_docIdContainSpecialChar() throws IOException {
+		byte[] bytesToDB = "binary data".getBytes();
+		ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytesToDB);
+		
+		Response respSave = dbClient.save(new Bar("i/" + generateUUID()));
+		
+		dbClient.saveAttachment(bytesIn, "foo.txt", "text/plain", respSave.getId(), respSave.getRev());
+	}
+	
+	// Helper
+	
+	private static String generateUUID() {
+		return UUID.randomUUID().toString().replace("-", "");
 	}
 }
