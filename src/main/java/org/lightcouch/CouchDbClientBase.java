@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
@@ -537,7 +538,9 @@ public abstract class CouchDbClientBase {
 		InputStream in = null;
 		try {
 			in = get(uri);
-			return getGson().fromJson(new InputStreamReader(in), classType);
+			return getGson().fromJson(new InputStreamReader(in, "UTF-8"), classType);
+		} catch (UnsupportedEncodingException e) {
+			throw new CouchDbException(e);
 		} finally {
 			close(in);
 		}
