@@ -46,8 +46,9 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
@@ -192,7 +193,7 @@ public class CouchDbClient extends CouchDbClientBase {
 					}).build();
 
 			return registry.register("https", new SSLConnectionSocketFactory(sslcontext, 
-					SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER)).build();
+					new NoopHostnameVerifier())).build();
 		} else {
 			return registry.register("http", PlainConnectionSocketFactory.INSTANCE).build();
 		}
