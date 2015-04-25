@@ -78,21 +78,21 @@ final class CouchDbUtil {
 	 * @return A JSON element as a String, or null if not found.
 	 */
 	public static String getAsString(JsonObject j, String e) {
-		return (j.get(e) == null) ? null : j.get(e).getAsString();  
+		return (j.get(e) == null || j.get(e).isJsonNull()) ? null : j.get(e).getAsString();  
 	}
 	
 	/**
 	 * @return A JSON element as <code>long</code>, or <code>0</code> if not found.
 	 */
 	public static long getAsLong(JsonObject j, String e) {
-		return (j.get(e) == null) ? 0L : j.get(e).getAsLong();
+		return (j.get(e) == null || j.get(e).isJsonNull()) ? 0L : j.get(e).getAsLong();
 	}
 	
 	/**
 	 * @return A JSON element as <code>int</code>, or <code>0</code> if not found.
 	 */
 	public static int getAsInt(JsonObject j, String e) {
-		return (j.get(e) == null) ? 0 : j.get(e).getAsInt();
+		return (j.get(e) == null || j.get(e).isJsonNull()) ? 0 : j.get(e).getAsInt();
 	}
 	
 	// Files
