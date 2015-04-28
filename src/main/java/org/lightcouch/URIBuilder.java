@@ -94,8 +94,19 @@ class URIBuilder {
 	}
 
 	public URIBuilder query(String name, Object value) {
-		if (name != null && value != null)
-			this.qParams.add(String.format("%s=%s", name, value));
+		String qPV = String.format("%s=%s", name, value);
+		if (name != null && value != null) {
+			for(int i = 0; i < this.qParams.size(); ++i) {
+				String[] tokens = this.qParams.get(i).split("=");
+				if(tokens != null && tokens.length > 0) {
+					if(tokens[0].compareTo(name) == 0) {
+						this.qParams.set(i, qPV);
+						return  this;
+					}
+				}
+			}
+			this.qParams.add(qPV);
+		}
 		return this;
 	}
 
@@ -133,6 +144,7 @@ class URIBuilder {
 	}
 
 	private void prepareQuery() {
+		query.delete(0, query.length());
 		for (int i = 0; i < qParams.size(); i++) {
 			String amp = (i != qParams.size() - 1) ? "&" : "";
 			query.append(qParams.get(i) + amp);
