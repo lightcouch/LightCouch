@@ -34,6 +34,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
 
+import org.apache.commons.codec.Charsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
@@ -654,7 +655,7 @@ public abstract class CouchDbClientBase {
 	 * @return {@link Response}
 	 */
 	private Response getResponse(HttpResponse response) throws CouchDbException {
-		InputStreamReader reader = new InputStreamReader(getStream(response));
+		InputStreamReader reader = new InputStreamReader(getStream(response), Charsets.UTF_8);
 		return getGson().fromJson(reader, Response.class);
 	}
 	
@@ -664,7 +665,7 @@ public abstract class CouchDbClientBase {
 	 */
 	private List<Response> getResponseList(HttpResponse response) throws CouchDbException {
 		InputStream instream = getStream(response);
-		Reader reader = new InputStreamReader(instream);
+		Reader reader = new InputStreamReader(instream, Charsets.UTF_8);
 		return getGson().fromJson(reader, new TypeToken<List<Response>>(){}.getType());
 	}
 	
