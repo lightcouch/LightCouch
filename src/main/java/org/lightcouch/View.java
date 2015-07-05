@@ -167,7 +167,7 @@ public class View {
 			close(instream);
 		}
 	}
-
+	
 	/**
 	 * Queries a view.
 	 * @param <K> Object type K (key)
@@ -178,6 +178,20 @@ public class View {
 	 * @return The View result entries.
 	 */
 	public <K, V, T> ViewResult<K, V, T> queryView(Class<K> classOfK, Class<V> classOfV, Class<T> classOfT) {
+	    	return queryView(classOfK, classOfV, classOfT, true);
+	}
+
+	/**
+	 * Queries a view.
+	 * @param <K> Object type K (key)
+	 * @param <V> Object type V (value)
+	 * @param classOfK The class of type K.
+	 * @param classOfV The class of type V.
+	 * @param classOfT The class of type T.
+	 * @param throwOnEmptyResult
+	 * @return The View result entries.
+	 */
+	public <K, V, T> ViewResult<K, V, T> queryView(Class<K> classOfK, Class<V> classOfV, Class<T> classOfT, boolean throwOnEmptyResult) {
 		InputStream instream = null;
 		try {  
 			Reader reader = new InputStreamReader(instream = queryForStream(), Charsets.UTF_8);
@@ -187,7 +201,7 @@ public class View {
 			vr.setOffset(getAsInt(json, "offset"));
 			vr.setUpdateSeq(getAsLong(json, "update_seq"));
 			JsonArray jsonArray = json.getAsJsonArray("rows");
-			if(jsonArray.size() == 0) { // validate available rows
+			if(jsonArray.size() == 0 && throwOnEmptyResult) { // validate available rows
 				throw new NoDocumentException("No result was returned by this view query.");
 			}
 			for (JsonElement e : jsonArray) {
