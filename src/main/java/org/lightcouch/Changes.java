@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 
+import org.apache.commons.codec.Charsets;
 import org.apache.http.client.methods.HttpGet;
 import org.lightcouch.ChangesResult.Row;
 
@@ -85,7 +86,7 @@ public class Changes {
 		final URI uri = uriBuilder.query("feed", "continuous").build();
 		httpGet = new HttpGet(uri);
 		final InputStream in = dbc.get(httpGet);
-		final InputStreamReader is = new InputStreamReader(in);
+		final InputStreamReader is = new InputStreamReader(in, Charsets.UTF_8);
 		setReader(new BufferedReader(is));
 		return this;
 	}

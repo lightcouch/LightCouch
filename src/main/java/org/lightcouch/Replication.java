@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Map;
 
+import org.apache.commons.codec.Charsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -100,7 +101,7 @@ public class Replication {
 			}
 			final URI uri = buildUri(dbc.getBaseUri()).path("_replicate").build();
 			response = dbc.post(uri, json.toString());
-			final InputStreamReader reader = new InputStreamReader(getStream(response));
+			final InputStreamReader reader = new InputStreamReader(getStream(response), Charsets.UTF_8);
 			return dbc.getGson().fromJson(reader, ReplicationResult.class);
 		} finally {
 			close(response);
