@@ -12,6 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * MODIFICATION OF THIS FILE: According to the requirements of the above-stated
+ * license, I hereby state modifications to this file: Sebastian Haufe added a
+ * further method "queryView" with an additional boolean argument
+ * "throwOnEmptyResult". This method modifies the existing one, the existing
+ * one now delegates to the new one. For this change, a pull request to the
+ * lightcouch master branch has been requested but not yet granted.
  */
 
 package org.lightcouch;
