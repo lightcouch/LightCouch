@@ -60,6 +60,27 @@ public class Document {
 	public void setAttachments(Map<String, Attachment> attachments) {
 		this.attachments = attachments;
 	}
+
+	public Document() {
+	}
+
+	/**
+	 * Copy contructor that does a deep copy
+	 * @param other The document to copy.
+	 */
+	public Document(Document other) {
+		setId(other.getId());
+		setRevision(other.getRevision());
+		if (other.getAttachments() != null) {
+			for(Map.Entry<String, Attachment> entry: other.getAttachments().entrySet()) {
+				Attachment attachment = entry.getValue();
+				// Attachments are not imutable so we need to copy them.
+				Attachment copy = new Attachment(attachment.getData(), attachment.getContentType());
+				addAttachment(entry.getKey(), copy);
+			}
+		}
+	}
+
 	
 	/**
 	 * Adds an in-line document attachment.
