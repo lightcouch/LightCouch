@@ -196,11 +196,10 @@ public class ViewsTest {
 			dbClient.save(foo);
 		}
 
-		View allDocs = dbClient.view("_all_docs");
 		String pageParam = null;
 		Page<Document> allDocsPage;
 		do {
-			allDocsPage = allDocs.queryPage(2, pageParam, Void.class, Document.class);
+			allDocsPage = dbClient.view("_all_docs").queryPage(2, pageParam, Void.class, Document.class);
 			// Do stuff
 			pageParam = allDocsPage.getNextParam();
 		} while (allDocsPage.isHasNext());
