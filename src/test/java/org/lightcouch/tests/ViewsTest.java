@@ -159,7 +159,7 @@ public class ViewsTest {
 		final int rowsPerPage = 3;
 		// first page - page #1 (rows 1 - 3)
 		Page<Foo> page = dbClient.view("example/foo")
-				.queryPage(rowsPerPage, null, Foo.class);
+				.queryPage(rowsPerPage, null, String.class, Foo.class);
 		assertFalse(page.isHasPrevious());
 		assertTrue(page.isHasNext());
 		assertThat(page.getResultFrom(), is(1));
@@ -169,7 +169,7 @@ public class ViewsTest {
 
 		String param = page.getNextParam();
 		// next page - page #2 (rows 4 - 6)
-		page = dbClient.view("example/foo").queryPage(rowsPerPage, param, Foo.class);
+		page = dbClient.view("example/foo").queryPage(rowsPerPage, param, String.class, Foo.class);
 		assertTrue(page.isHasPrevious());
 		assertTrue(page.isHasNext());
 		assertThat(page.getResultFrom(), is(4));
@@ -179,7 +179,7 @@ public class ViewsTest {
 
 		param = page.getPreviousParam();
 		// previous page, page #1 (rows 1 - 3)
-		page = dbClient.view("example/foo").queryPage(rowsPerPage, param, Foo.class);
+		page = dbClient.view("example/foo").queryPage(rowsPerPage, param, String.class, Foo.class);
 		assertFalse(page.isHasPrevious());
 		assertTrue(page.isHasNext());
 		assertThat(page.getResultFrom(), is(1));
@@ -200,7 +200,7 @@ public class ViewsTest {
 		String pageParam = null;
 		Page<Document> allDocsPage;
 		do {
-			allDocsPage = allDocs.queryPage(2, pageParam, Document.class);
+			allDocsPage = allDocs.queryPage(2, pageParam, Void.class, Document.class);
 			// Do stuff
 			pageParam = allDocsPage.getNextParam();
 		} while (allDocsPage.isHasNext());

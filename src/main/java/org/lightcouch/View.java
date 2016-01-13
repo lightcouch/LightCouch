@@ -259,12 +259,13 @@ public class View {
 	 * @param <T> Object type T
 	 * @param rowsPerPage The number of rows per page.
 	 * @param param The request parameter to use to query a page, or {@code null} to return the first page.
+	 * @param classOfV The class of type V
 	 * @param classOfT The class of type T.
 	 * @return {@link Page}
 	 */
-	public <T> Page<T> queryPage(int rowsPerPage, String param, Class<T> classOfT) {
+	public <V,T> Page<T> queryPage(int rowsPerPage, String param, Class<V> classOfV, Class<T> classOfT) {
 		if(param == null) { // assume first page
-			return queryNextPage(rowsPerPage, null, null, null, null, classOfT);
+			return queryNextPage(rowsPerPage, null, null, null, null, classOfV, classOfT);
 		}
 		String currentStartKey;
 		String currentStartKeyDocId;
@@ -287,17 +288,17 @@ public class View {
 			throw new CouchDbException("could not parse the given param!", e);
 		}
 		if(PREVIOUS.equals(action)) { // previous
-			return queryPreviousPage(rowsPerPage, currentStartKey, currentStartKeyDocId, startKey, startKeyDocId, classOfT);
+			return queryPreviousPage(rowsPerPage, currentStartKey, currentStartKeyDocId, startKey, startKeyDocId, classOfV, classOfT);
 		} else { // next
-			return queryNextPage(rowsPerPage, currentStartKey, currentStartKeyDocId, startKey, startKeyDocId, classOfT);
+			return queryNextPage(rowsPerPage, currentStartKey, currentStartKeyDocId, startKey, startKeyDocId, classOfV, classOfT);
 		}
 	}
 	
 	/**
 	 * @return The next page.
 	 */
-	private <T> Page<T> queryNextPage(int rowsPerPage, String currentStartKey, 
-			String currentStartKeyDocId, String startKey, String startKeyDocId, Class<T> classOfT) {
+	private <V,T> Page<T> queryNextPage(int rowsPerPage, String currentStartKey,
+			String currentStartKeyDocId, String startKey, String startKeyDocId, Class<V> classOfV, Class<T> classOfT) {
 		// set view query params
 		limit(rowsPerPage + 1);
 		includeDocs(true);
@@ -308,8 +309,8 @@ public class View {
 		// init page, query view
 		final Page<T> page = new Page<T>();
 		final List<T> pageList = new ArrayList<T>();
-		final ViewResult<String, String, T> vr = queryView(String.class, String.class, classOfT);
-		final List<ViewResult<String, String, T>.Rows> rows = vr.getRows();
+		final ViewResult<String, V, T> vr = queryView(String.class, classOfV, classOfT);
+		final List<ViewResult<String, V, T>.Rows> rows = vr.getRows();
 		final int resultRows = rows.size();
 		final int offset = vr.getOffset();
 		final long totalRows = vr.getTotalRows();
@@ -356,8 +357,8 @@ public class View {
 	/**
 	 * @return The previous page.
 	 */
-	private <T> Page<T> queryPreviousPage(int rowsPerPage, String currentStartKey, 
-			String currentStartKeyDocId, String startKey, String startKeyDocId, Class<T> classOfT) {
+	private <V,T> Page<T> queryPreviousPage(int rowsPerPage, String currentStartKey,
+			String currentStartKeyDocId, String startKey, String startKeyDocId, Class<V> classofV, Class<T> classOfT) {
 		// set view query params
 		limit(rowsPerPage + 1);
 		includeDocs(true);
@@ -367,8 +368,8 @@ public class View {
 		// init page, query view
 		final Page<T> page = new Page<T>();
 		final List<T> pageList = new ArrayList<T>();
-		final ViewResult<String, String, T> vr = queryView(String.class, String.class, classOfT);
-		final List<ViewResult<String, String, T>.Rows> rows = vr.getRows();
+		final ViewResult<String, V, T> vr = queryView(String.class, classofV, classOfT);
+		final List<ViewResult<String, V, T>.Rows> rows = vr.getRows();
 		final int resultRows = rows.size();
 		final int offset = vr.getOffset();
 		final long totalRows = vr.getTotalRows();
