@@ -29,11 +29,7 @@ import java.util.UUID;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.lightcouch.CouchDbClient;
-import org.lightcouch.DocumentConflictException;
-import org.lightcouch.NoDocumentException;
-import org.lightcouch.Page;
-import org.lightcouch.ViewResult;
+import org.lightcouch.*;
 
 import com.google.gson.JsonObject;
 
@@ -163,7 +159,7 @@ public class ViewsTest {
 		final int rowsPerPage = 3;
 		// first page - page #1 (rows 1 - 3)
 		Page<Foo> page = dbClient.view("example/foo")
-				.queryPage(rowsPerPage,	null, Foo.class);
+				.queryPage(rowsPerPage, null, Foo.class);
 		assertFalse(page.isHasPrevious());
 		assertTrue(page.isHasNext());
 		assertThat(page.getResultFrom(), is(1));
@@ -190,6 +186,25 @@ public class ViewsTest {
 		assertThat(page.getResultTo(), is(3));
 		assertThat(page.getPageNumber(), is(1));
 		assertThat(page.getResultList().size(), is(3));
+
+	}
+
+	@Test
+	public void testViewPaginationAllDocs() {
+		for (int i = 0; i < 7; i++) {
+			Foo foo = new Foo(generateUUID(), "all-docs-pagination");
+			dbClient.save(foo);
+		}
+
+		View allDocs = dbClient.view("_all_docs");
+		String pageParam = null;
+		Page<Document> allDocsPage;
+		do {
+			allDocsPage = allDocs.queryPage(2, pageParam, Document.class);
+			// Do stuff
+			pageParam = allDocsPage.getNextParam();
+		} while (allDocsPage.isHasNext());
+
 	}
 
 	private static void init() {
