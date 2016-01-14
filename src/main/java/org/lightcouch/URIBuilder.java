@@ -16,6 +16,9 @@
 
 package org.lightcouch;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,7 +40,7 @@ class URIBuilder {
 	/* The final query */
 	private final StringBuilder query = new StringBuilder();
 	/* key=value params */
-	private final List<String> qParams = new ArrayList<String>();
+	private final List<NameValuePair> qParams = new ArrayList<NameValuePair>();
 	private boolean uriEncoded = false;
 
 	public static URIBuilder buildUri() {
@@ -51,11 +54,10 @@ class URIBuilder {
 	}
 
 	public URI build() {
-		prepareQuery();
-		
-		if(uriEncoded)
+		if(uriEncoded) {
+			prepareQuery();
 			return createUriEncoded();
-		else
+		} else
 			return createUri();
 	}
 
@@ -94,8 +96,9 @@ class URIBuilder {
 	}
 
 	public URIBuilder query(String name, Object value) {
-		if (name != null && value != null)
-			this.qParams.add(String.format("%s=%s", name, value));
+		if (name != null && value != null) {
+			this.qParams.add(new BasicNameValuePair(name, String.valueOf(value)));
+		}
 		return this;
 	}
 
@@ -115,8 +118,17 @@ class URIBuilder {
 	
 	private URI createUri() {
 		try {
-			String q = (query.length() == 0) ? null : query.toString();
-			return new URI(scheme, null, host, port, path, q, null);
+			org.apache.http.client.utils.URIBuilder uriBuilder = new org.apache.http.client.utils.URIBuilder();
+			uriBuilder.setScheme(scheme);
+			uriBuilder.setHost(host);
+			uriBuilder.setPort(port);
+			uriBuilder.setPath(path);
+			if (query.length() > 0) {
+				uriBuilder.setCustomQuery(query.toString());
+			} else if (!qParams.isEmpty()) {
+				uriBuilder.setParameters(qParams);
+			}
+			return uriBuilder.build();
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
