@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.Vector;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -92,6 +93,18 @@ public class ViewsTest {
 				.reduce(false)
 				.query(Foo.class);
 		assertThat(foos.size(), is(2));
+	}
+
+	@Test
+	public void byComplexKeys() {
+		List<int[]> keysToGet = new Vector<int[]>();
+		keysToGet.add(new int[] { 2011, 10, 15 });
+		keysToGet.add(new int[] { 2013, 12, 17 });
+		ViewResult<Integer[], Integer, Foo> fooRows = dbClient.view("example/by_date")
+				.keys(keysToGet)
+				.group(true)
+				.queryView(Integer[].class, Integer.class, Foo.class);
+		assertThat(fooRows.getRows().size(), is(2));
 	}
 
 	@Test
