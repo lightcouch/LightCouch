@@ -16,6 +16,8 @@
 
 package org.lightcouch;
 
+import javax.net.ssl.SSLContext;
+
 /**
  * Represents configuration properties for connecting to CouchDB.
  * 
@@ -40,6 +42,7 @@ public class CouchDbProperties {
 	private int maxConnections;
 	private String proxyHost;
 	private int proxyPort;
+	private SSLContext sslContext;
 
 	public CouchDbProperties() {
 		// default constructor
@@ -107,6 +110,10 @@ public class CouchDbProperties {
 	public int getProxyPort() {
 		return proxyPort;
 	}
+	
+	public SSLContext getSSLContext() {
+		return sslContext;
+	}
 
 	public CouchDbProperties setDbName(String dbName) {
 		this.dbName = dbName;
@@ -170,6 +177,11 @@ public class CouchDbProperties {
 
 	public CouchDbProperties setProxyPort(int proxyPort) {
 		this.proxyPort = proxyPort;
+		return this;
+	}
+	
+	public CouchDbProperties setSSLContext(SSLContext sslContext) {
+		this.sslContext = sslContext;
 		return this;
 	}
 
