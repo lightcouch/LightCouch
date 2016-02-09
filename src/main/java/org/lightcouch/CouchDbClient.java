@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.Consts;
@@ -185,8 +186,7 @@ public class CouchDbClient extends CouchDbClientBase {
 
 		if("https".equals(props.getProtocol())) {
 			SSLContext sslContext = props.getSSLContext();
-			if (sslContext == null)
-			{
+			if (sslContext == null) {
 				sslContext = SSLContexts.custom()
 						.loadTrustMaterial(null, new TrustStrategy(){
 							public boolean isTrusted(X509Certificate[] chain, String authType)
@@ -195,9 +195,14 @@ public class CouchDbClient extends CouchDbClientBase {
 							}
 						}).build();
 			}
+			
+			HostnameVerifier hostnameVerifier = props.getHostnameVerifier();
+			if(hostnameVerifier == null) {
+				hostnameVerifier = new NoopHostnameVerifier();
+			}
 
 			return registry.register("https", new SSLConnectionSocketFactory(sslContext, 
-					new NoopHostnameVerifier())).build();
+					hostnameVerifier)).build();
 		} else {
 			return registry.register("http", PlainConnectionSocketFactory.INSTANCE).build();
 		}

@@ -16,6 +16,7 @@
 
 package org.lightcouch;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 /**
@@ -43,6 +44,7 @@ public class CouchDbProperties {
 	private String proxyHost;
 	private int proxyPort;
 	private SSLContext sslContext;
+	private HostnameVerifier hostnameVerifier;
 
 	public CouchDbProperties() {
 		// default constructor
@@ -114,6 +116,10 @@ public class CouchDbProperties {
 	public SSLContext getSSLContext() {
 		return sslContext;
 	}
+	
+	public HostnameVerifier getHostnameVerifier() {
+		return hostnameVerifier;
+	}
 
 	public CouchDbProperties setDbName(String dbName) {
 		this.dbName = dbName;
@@ -182,6 +188,11 @@ public class CouchDbProperties {
 	
 	public CouchDbProperties setSSLContext(SSLContext sslContext) {
 		this.sslContext = sslContext;
+		return this;
+	}
+	
+	public CouchDbProperties setHostnameVerifier(HostnameVerifier hostnameVerifier) {
+		this.hostnameVerifier = hostnameVerifier;
 		return this;
 	}
 
