@@ -12,6 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *  
+ * MODIFICATION OF THIS FILE: According to the requirements of the above-stated
+ * license, I hereby state modifications to this file: Sebastian Haufe added the
+ * further parameters sslContext and hostnameVerifier and corresponding access
+ * methods.  This note should be removed once the pull request to the master has
+ * been granted.
  */
 
 package org.lightcouch;
