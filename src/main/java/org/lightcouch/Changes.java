@@ -90,7 +90,7 @@ public class Changes {
 		setReader(new BufferedReader(is));
 		return this;
 	}
-
+	
 	/**
 	 * Checks whether a feed is available in the continuous stream, blocking 
 	 * until a feed is received. 
@@ -166,16 +166,16 @@ public class Changes {
 	private boolean readNextRow() {
 		boolean hasNext = false;
 		try {
-			if(!stop) {
-				String row = ""; 
-				do {
-					row = getReader().readLine(); 
-				} while(row.length() == 0);
-				
-				if(!row.startsWith("{\"last_seq\":")) { 
-					setNextRow(gson.fromJson(row, Row.class));
-					hasNext = true;
-				} 
+			String row = ""; 
+			while(!stop && row.length() == 0) {
+				row = getReader().readLine(); 
+				if (Thread.interrupted()) {
+					stop();
+				}
+			} 
+			if(!stop && !row.startsWith("{\"last_seq\":")) { 
+				setNextRow(gson.fromJson(row, Row.class));
+				hasNext = true;
 			} 
 		} catch (Exception e) {
 			terminate();
