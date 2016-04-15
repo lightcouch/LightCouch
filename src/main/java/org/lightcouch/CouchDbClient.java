@@ -16,6 +16,7 @@
 
 package org.lightcouch;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.security.KeyManagementException;
@@ -85,7 +86,7 @@ import org.apache.http.protocol.HttpContext;
  * @author Ahmed Yehia
  *
  */
-public class CouchDbClient extends CouchDbClientBase {
+public class CouchDbClient extends CouchDbClientBase implements Closeable {
 
 	/**
 	 * Constructs a new instance of this class, expects a configuration file named 
@@ -226,5 +227,10 @@ public class CouchDbClient extends CouchDbClientBase {
 	
 	public void shutdown() {
 		HttpClientUtils.closeQuietly(this.httpClient);
+	}
+
+	@Override
+	public void close() throws IOException {
+		shutdown();
 	}
 }
