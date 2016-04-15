@@ -540,7 +540,7 @@ public class View {
 	 * @param keys
 	 * @return
 	 */
-	public View keys(List<String> keys) {
+	public View keys(List<?> keys) {
 		this.allDocsKeys = String.format("{%s:%s}", gson.toJson("keys"), gson.toJson(keys));
 		return this;
 	}
