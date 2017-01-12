@@ -32,6 +32,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.Charsets;
@@ -55,11 +56,13 @@ import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
@@ -254,6 +257,33 @@ public abstract class CouchDbClientBase {
 		assertNotEmpty(rev, "rev");
 		final URI uri = buildUri(getDBUri()).path(id).query("rev", rev).build();
 		return get(uri);
+	}
+	
+	/**
+	 * Find documents using a declarative JSON querying syntax.
+	 * @param jsonQuery The JSON query string.
+	 * @param classOfT The class of type T.
+	 * @return The result of the query as a {@code List<T> }
+	 * @throws CouchDbException If the query failed to execute or the request is invalid.
+	 */
+	public <T> List<T> findDocs(String jsonQuery, Class<T> classOfT) {
+		assertNotEmpty(jsonQuery, "jsonQuery");
+		HttpResponse response = null;
+		try {
+			response = post(buildUri(getDBUri()).path("_find").build(), jsonQuery);
+			Reader reader = new InputStreamReader(getStream(response), Charsets.UTF_8);
+			JsonArray jsonArray = new JsonParser().parse(reader)
+					.getAsJsonObject().getAsJsonArray("docs");
+			List<T> list = new ArrayList<T>();
+			for (JsonElement jsonElem : jsonArray) {
+				JsonElement elem = jsonElem.getAsJsonObject();
+				T t = this.gson.fromJson(elem, classOfT);
+				list.add(t);
+			}
+				return list;
+		} finally {
+			close(response);
+		}
 	}
 	
 	/**
