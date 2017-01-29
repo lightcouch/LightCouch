@@ -56,7 +56,7 @@ public class UpdateHandlerTest {
 		Foo foo = dbClient.find(Foo.class, response.getId());
 		
 		assertNotNull(output);
-		assertEquals(foo.getTitle(), newValue);
+		assertEquals(newValue, foo.getTitle());
 	}
 	
 	@Test
@@ -75,6 +75,6 @@ public class UpdateHandlerTest {
 		Foo foo = dbClient.find(Foo.class, response.getId());
 		
 		assertNotNull(output);
-		assertEquals(foo.getTitle(), newValue);
+		assertEquals(newValue, foo.getTitle());
 	}
 }

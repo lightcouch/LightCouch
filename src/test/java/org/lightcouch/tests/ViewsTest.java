@@ -45,7 +45,6 @@ public class ViewsTest {
 	@BeforeClass
 	public static void setUpClass() {
 		dbClient = new CouchDbClient();
-
 		dbClient.syncDesignDocsWithDb();
 		
 		init(); 
@@ -69,6 +68,15 @@ public class ViewsTest {
 		List<Foo> foos = dbClient.view("example/foo")
 				.includeDocs(true)
 				.key("key-1")
+				.query(Foo.class);
+		assertThat(foos.size(), is(1));
+	}
+
+	@Test
+	public void byKeyWithPlus() {
+		List<Foo> foos = dbClient.view("example/foo")
+				.includeDocs(true)
+				.key("+key-4")
 				.query(Foo.class);
 		assertThat(foos.size(), is(1));
 	}
@@ -112,7 +120,7 @@ public class ViewsTest {
 		ViewResult<int[], String, Foo> viewResult = dbClient.view("example/by_date")
 				.reduce(false)
 				.queryView(int[].class, String.class, Foo.class);
-		assertThat(viewResult.getRows().size(), is(3));
+		assertThat(viewResult.getRows().size(), is(4));
 	}
 
 	@Test
@@ -210,19 +218,22 @@ public class ViewsTest {
 			Foo foo = null;
 
 			foo = new Foo("id-1", "key-1");
-			foo.setTags(Arrays.asList(new String[] { "couchdb", "views" }));
-			foo.setComplexDate(new int[] { 2011, 10, 15 });
+			foo.setTags(Arrays.asList(new String[]{"couchdb", "views"}));
+			foo.setComplexDate(new int[]{2011, 10, 15});
 			dbClient.save(foo);
 
 			foo = new Foo("id-2", "key-2");
-			foo.setTags(Arrays.asList(new String[] { "java", "couchdb" }));
-			foo.setComplexDate(new int[] { 2011, 10, 15 });
+			foo.setTags(Arrays.asList(new String[]{"java", "couchdb"}));
+			foo.setComplexDate(new int[]{2011, 10, 15});
 			dbClient.save(foo);
 
 			foo = new Foo("id-3", "key-3");
-			foo.setComplexDate(new int[] { 2013, 12, 17 });
+			foo.setComplexDate(new int[]{2013, 12, 17});
 			dbClient.save(foo);
 
+			foo = new Foo("id-4", "+key-4");
+			foo.setComplexDate(new int[]{2013, 12, 17});
+			dbClient.save(foo);
 		} catch (DocumentConflictException e) {
 		}
 	}
