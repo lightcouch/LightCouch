@@ -46,7 +46,9 @@ import com.google.gson.JsonObject;
  */
 final class CouchDbUtil {
 
-	private CouchDbUtil() {
+  public static final String SPRING_BOOT_DIR = "BOOT-INF/classes/";
+
+  private CouchDbUtil() {
 		// Utility class
 	}
 	
@@ -105,7 +107,6 @@ final class CouchDbUtil {
 	 * Works for regular files and also JARs.
 	 * 
 	 * @author Greg Briggs
-	 * @param clazz Any java class that lives in the same place as the resources you want.
 	 * @param path Should end with "/", but not start with one.
 	 * @return Just the name of each member item, not the full paths.
 	 */
@@ -123,6 +124,9 @@ final class CouchDbUtil {
 				Set<String> result = new HashSet<String>(); 
 				while(entries.hasMoreElements()) {
 					String name = entries.nextElement().getName();
+          if (name.startsWith(SPRING_BOOT_DIR)) {
+            name = name.substring(SPRING_BOOT_DIR.length());
+          }
 					if (name.startsWith(path)) { 
 						String entry = name.substring(path.length());
 						int checkSubdir = entry.indexOf("/");
@@ -142,7 +146,7 @@ final class CouchDbUtil {
 			throw new CouchDbException(e);
 		}
 	}
-	
+
 	public static String readFile(String path) {
 		InputStream instream = CouchDbUtil.class.getResourceAsStream(path);
 		StringBuilder content = new StringBuilder();
