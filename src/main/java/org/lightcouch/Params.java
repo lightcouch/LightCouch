@@ -16,8 +16,9 @@
 
 package org.lightcouch;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,50 +35,44 @@ import java.util.List;
  */
 public class Params {
 
-	private List<String> params = new ArrayList<String>();
+	private List<NameValuePair> params = new ArrayList<NameValuePair>();
 
 	public Params revsInfo() {
-		params.add("revs_info=true");
+		params.add(new BasicNameValuePair("revs_info", "true"));
 		return this;
 	}
 
 	public Params attachments() {
-		params.add("attachments=true");
+		params.add(new BasicNameValuePair("attachments", "true"));
 		return this;
 	}
 
 	public Params revisions() {
-		params.add("revs=true");
+		params.add(new BasicNameValuePair("revs", "true"));
 		return this;
 	}
 
 	public Params rev(String rev) {
-		params.add(String.format("rev=%s", rev));
+		params.add(new BasicNameValuePair("rev", rev));
 		return this;
 	}
 
 	public Params conflicts() {
-		params.add("conflicts=true");
+		params.add(new BasicNameValuePair("conflicts", "true"));
 		return this;
 	}
 
 	public Params localSeq() {
-		params.add("local_seq=true");
+		params.add(new BasicNameValuePair("local_seq", "true"));
 		return this;
 	}
 
 	public Params addParam(String name, String value) {
-		try {
-			name = URLEncoder.encode(name, "UTF-8");
-			value = URLEncoder.encode(value, "UTF-8");
-			params.add(String.format("%s=%s", name, value));
-		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException(e);
-		}
+		params.add(new BasicNameValuePair(name, value));
 		return this;
 	}
 
-	public List<String> getParams() {
+	public List<NameValuePair> getParams() {
 		return params.isEmpty() ? null : params;
 	}
 }
