@@ -36,120 +36,120 @@ import com.google.gson.JsonObject;
 
 public class ChangeNotificationsTest {
 
-  private static CouchDbClient dbClient;
+	private static CouchDbClient dbClient;
 
-  @BeforeClass
-  public static void setUpClass() {
-    dbClient = new CouchDbClient();
-  }
+	@BeforeClass
+	public static void setUpClass() {
+		dbClient = new CouchDbClient();
+	}
 
-  @AfterClass
-  public static void tearDownClass() {
-    dbClient.shutdown();
-  }
+	@AfterClass
+	public static void tearDownClass() {
+		dbClient.shutdown();
+	}
 
-  @Test
-  public void changes_normalFeed() {
-    dbClient.save(new Foo());
+	@Test
+	public void changes_normalFeed() {
+		dbClient.save(new Foo());
 
-    ChangesResult changes = dbClient.changes()
-      .includeDocs(true)
-      .limit(1)
-      .getChanges();
+		ChangesResult changes = dbClient.changes()
+			.includeDocs(true)
+			.limit(1)
+			.getChanges();
 
-    List<ChangesResult.Row> rows = changes.getResults();
+		List<ChangesResult.Row> rows = changes.getResults();
 
-    for (Row row : rows) {
-      List<ChangesResult.Row.Rev> revs = row.getChanges();
-      String docId = row.getId();
-      JsonObject doc = row.getDoc();
+		for (Row row : rows) {
+			List<ChangesResult.Row.Rev> revs = row.getChanges();
+			String docId = row.getId();
+			JsonObject doc = row.getDoc();
 
-      assertNotNull(revs);
-      assertNotNull(docId);
-      assertNotNull(doc);
-    }
+			assertNotNull(revs);
+			assertNotNull(docId);
+			assertNotNull(doc);
+		}
 
-    assertThat(rows.size(), is(1));
-  }
+		assertThat(rows.size(), is(1));
+	}
 
-  @Test
-  public void changes_normalFeed_selector() {
-    dbClient.save(new Foo());
+	@Test
+	public void changes_normalFeed_selector() {
+		dbClient.save(new Foo());
 
-    ChangesResult changes = dbClient.changes()
-      .includeDocs(true)
-      .limit(1)
-      .selector("{\"selector\":{\"_id\": {\"$gt\": null}}}")
-      .getChanges();
+		ChangesResult changes = dbClient.changes()
+			.includeDocs(true)
+			.limit(1)
+			.selector("{\"selector\":{\"_id\": {\"$gt\": null}}}")
+			.getChanges();
 
-    List<ChangesResult.Row> rows = changes.getResults();
+		List<ChangesResult.Row> rows = changes.getResults();
 
-    for (Row row : rows) {
-      List<ChangesResult.Row.Rev> revs = row.getChanges();
-      String docId = row.getId();
-      JsonObject doc = row.getDoc();
+		for (Row row : rows) {
+			List<ChangesResult.Row.Rev> revs = row.getChanges();
+			String docId = row.getId();
+			JsonObject doc = row.getDoc();
 
-      assertNotNull(revs);
-      assertNotNull(docId);
-      assertNotNull(doc);
-    }
+			assertNotNull(revs);
+			assertNotNull(docId);
+			assertNotNull(doc);
+		}
 
-    assertThat(rows.size(), is(1));
-  }
+		assertThat(rows.size(), is(1));
+	}
 
-  @Test
-  public void changes_continuousFeed() {
-    dbClient.save(new Foo());
+	@Test
+	public void changes_continuousFeed() {
+		dbClient.save(new Foo());
 
-    CouchDbInfo dbInfo = dbClient.context().info();
-    String since = dbInfo.getUpdateSeq();
+		CouchDbInfo dbInfo = dbClient.context().info();
+		String since = dbInfo.getUpdateSeq();
 
-    Changes changes = dbClient.changes()
-      .includeDocs(true)
-      .since(since)
-      .heartBeat(1000)
-      .continuousChanges();
+		Changes changes = dbClient.changes()
+			.includeDocs(true)
+			.since(since)
+			.heartBeat(1000)
+			.continuousChanges();
 
-    Response response = dbClient.save(new Foo());
+		Response response = dbClient.save(new Foo());
 
-    while (changes.hasNext()) {
-      ChangesResult.Row feed = changes.next();
-      final JsonObject feedObject = feed.getDoc();
-      final String docId = feed.getId();
+		while (changes.hasNext()) {
+			ChangesResult.Row feed = changes.next();
+			final JsonObject feedObject = feed.getDoc();
+			final String docId = feed.getId();
 
-      assertEquals(response.getId(), docId);
-      assertNotNull(feedObject);
+			assertEquals(response.getId(), docId);
+			assertNotNull(feedObject);
 
-      changes.stop();
-    }
-  }
+			changes.stop();
+		}
+	}
 
-  @Test
-  public void changes_continuousFeed_selector() {
-    dbClient.save(new Foo());
+	@Test
+	public void changes_continuousFeed_selector() {
+		dbClient.save(new Foo());
 
-    CouchDbInfo dbInfo = dbClient.context().info();
-    String since = dbInfo.getUpdateSeq();
+		CouchDbInfo dbInfo = dbClient.context().info();
+		String since = dbInfo.getUpdateSeq();
 
-    Changes changes = dbClient.changes()
-      .includeDocs(true)
-      .since(since)
-      .heartBeat(1000)
-      .selector("{\"selector\":{\"_id\": {\"$gt\": null}}}")
-      .continuousChanges();
+		Changes changes = dbClient.changes()
+			.includeDocs(true)
+			.since(since)
+			.heartBeat(1000)
+			.selector("{\"selector\":{\"_id\": {\"$gt\": null}}}")
+			.continuousChanges();
 
-    Response response = dbClient.save(new Foo());
+		Response response = dbClient.save(new Foo());
 
-    while (changes.hasNext()) {
-      ChangesResult.Row feed = changes.next();
-      final JsonObject feedObject = feed.getDoc();
-      final String docId = feed.getId();
-      System.out.println("next()=" + docId);
+		while (changes.hasNext()) {
+			ChangesResult.Row feed = changes.next();
+			final JsonObject feedObject = feed.getDoc();
+			final String docId = feed.getId();
+			System.out.println("next()=" + docId);
 
-      assertEquals(response.getId(), docId);
-      assertNotNull(feedObject);
+			assertEquals(response.getId(), docId);
+			assertNotNull(feedObject);
 
-      changes.stop();
-    }
-  }
+			changes.stop();
+		}
+	}
 }

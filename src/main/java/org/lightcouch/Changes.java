@@ -66,169 +66,169 @@ import org.apache.http.client.methods.HttpRequestBase;
  */
 public class Changes {
 
-  private BufferedReader reader;
-  private HttpRequestBase httpRequest;
-  private Row nextRow;
-  private boolean stop;
+	private BufferedReader reader;
+	private HttpRequestBase httpRequest;
+	private Row nextRow;
+	private boolean stop;
 
-  private CouchDbClientBase dbc;
-  private Gson gson;
-  private URIBuilder uriBuilder;
+	private CouchDbClientBase dbc;
+	private Gson gson;
+	private URIBuilder uriBuilder;
 
-  private String selector;
+	private String selector;
 
-  Changes(CouchDbClientBase dbc) {
-    this.dbc = dbc;
-    this.gson = dbc.getGson();
-    this.uriBuilder = URIBuilder.buildUri(dbc.getDBUri()).path("_changes");
-  }
+	Changes(CouchDbClientBase dbc) {
+		this.dbc = dbc;
+		this.gson = dbc.getGson();
+		this.uriBuilder = URIBuilder.buildUri(dbc.getDBUri()).path("_changes");
+	}
 
-  /**
-   * Requests Change notifications of feed type continuous.
-   * <p>
-   * Feed notifications are accessed in an <i>iterator</i> style.
-   */
-  public Changes continuousChanges() {
-    final URI uri = uriBuilder.query("feed", "continuous").build();
-    if (selector == null) {
-      final HttpGet get = new HttpGet(uri);
-      httpRequest = get;
-      final InputStream in = dbc.get(get);
-      final InputStreamReader is = new InputStreamReader(in, Charsets.UTF_8);
-      setReader(new BufferedReader(is));
-    } else {
-      final HttpPost post = new HttpPost(uri);
-      httpRequest = post;
-      final InputStream in = dbc.post(post, selector);
-      final InputStreamReader is = new InputStreamReader(in, Charsets.UTF_8);
-      setReader(new BufferedReader(is));
-    }
+	/**
+	 * Requests Change notifications of feed type continuous.
+	 * <p>
+	 * Feed notifications are accessed in an <i>iterator</i> style.
+	 */
+	public Changes continuousChanges() {
+		final URI uri = uriBuilder.query("feed", "continuous").build();
+		if (selector == null) {
+			final HttpGet get = new HttpGet(uri);
+			httpRequest = get;
+			final InputStream in = dbc.get(get);
+			final InputStreamReader is = new InputStreamReader(in, Charsets.UTF_8);
+			setReader(new BufferedReader(is));
+		} else {
+			final HttpPost post = new HttpPost(uri);
+			httpRequest = post;
+			final InputStream in = dbc.post(post, selector);
+			final InputStreamReader is = new InputStreamReader(in, Charsets.UTF_8);
+			setReader(new BufferedReader(is));
+		}
 
-    return this;
-  }
+		return this;
+	}
 
-  // Query Params
-  public Changes selector(String json) {
-    uriBuilder.query("filter", "_selector");
-    this.selector = json;
-    return this;
-  }
+	// Query Params
+	public Changes selector(String json) {
+		uriBuilder.query("filter", "_selector");
+		this.selector = json;
+		return this;
+	}
 
-  /**
-   * Checks whether a feed is available in the continuous stream, blocking until a feed is received.
-   */
-  public boolean hasNext() {
-    return readNextRow();
-  }
+	/**
+	 * Checks whether a feed is available in the continuous stream, blocking until a feed is received.
+	 */
+	public boolean hasNext() {
+		return readNextRow();
+	}
 
-  /**
-   * @return The next feed in the stream.
-   */
-  public Row next() {
-    return getNextRow();
-  }
+	/**
+	 * @return The next feed in the stream.
+	 */
+	public Row next() {
+		return getNextRow();
+	}
 
-  /**
-   * Stops a running continuous feed.
-   */
-  public void stop() {
-    stop = true;
-  }
+	/**
+	 * Stops a running continuous feed.
+	 */
+	public void stop() {
+		stop = true;
+	}
 
-  /**
-   * Requests Change notifications of feed type normal.
-   */
-  public ChangesResult getChanges() {
-    final URI uri = uriBuilder.query("feed", "normal").build();
-    if (selector == null) {
-      return dbc.get(uri, ChangesResult.class);
-    } else {
-      return dbc.post(uri, selector, ChangesResult.class);
-    }
-  }
+	/**
+	 * Requests Change notifications of feed type normal.
+	 */
+	public ChangesResult getChanges() {
+		final URI uri = uriBuilder.query("feed", "normal").build();
+		if (selector == null) {
+			return dbc.get(uri, ChangesResult.class);
+		} else {
+			return dbc.post(uri, selector, ChangesResult.class);
+		}
+	}
 
-  // Query Params
-  public Changes since(String since) {
-    uriBuilder.query("since", since);
-    return this;
-  }
+	// Query Params
+	public Changes since(String since) {
+		uriBuilder.query("since", since);
+		return this;
+	}
 
-  public Changes limit(int limit) {
-    uriBuilder.query("limit", limit);
-    return this;
-  }
+	public Changes limit(int limit) {
+		uriBuilder.query("limit", limit);
+		return this;
+	}
 
-  public Changes heartBeat(long heartBeat) {
-    uriBuilder.query("heartbeat", heartBeat);
-    return this;
-  }
+	public Changes heartBeat(long heartBeat) {
+		uriBuilder.query("heartbeat", heartBeat);
+		return this;
+	}
 
-  public Changes timeout(long timeout) {
-    uriBuilder.query("timeout", timeout);
-    return this;
-  }
+	public Changes timeout(long timeout) {
+		uriBuilder.query("timeout", timeout);
+		return this;
+	}
 
-  public Changes filter(String filter) {
-    uriBuilder.query("filter", filter);
-    return this;
-  }
+	public Changes filter(String filter) {
+		uriBuilder.query("filter", filter);
+		return this;
+	}
 
-  public Changes includeDocs(boolean includeDocs) {
-    uriBuilder.query("include_docs", includeDocs);
-    return this;
-  }
+	public Changes includeDocs(boolean includeDocs) {
+		uriBuilder.query("include_docs", includeDocs);
+		return this;
+	}
 
-  public Changes style(String style) {
-    uriBuilder.query("style", style);
-    return this;
-  }
+	public Changes style(String style) {
+		uriBuilder.query("style", style);
+		return this;
+	}
 
-  // Helper
-  /**
-   * Reads and sets the next feed in the stream.
-   */
-  private boolean readNextRow() {
-    boolean hasNext = false;
-    try {
-      if (!stop) {
-        String row = "";
-        do {
-          row = getReader().readLine();
-        } while (row.length() == 0);
+	// Helper
+	/**
+	 * Reads and sets the next feed in the stream.
+	 */
+	private boolean readNextRow() {
+		boolean hasNext = false;
+		try {
+			if (!stop) {
+				String row = "";
+				do {
+					row = getReader().readLine();
+				} while (row.length() == 0);
 
-        if (!row.startsWith("{\"last_seq\":")) {
-          setNextRow(gson.fromJson(row, Row.class));
-          hasNext = true;
-        }
-      }
-    } catch (Exception e) {
-      terminate();
-      throw new CouchDbException("Error reading continuous stream.", e);
-    }
-    if (!hasNext) {
-      terminate();
-    }
-    return hasNext;
-  }
+				if (!row.startsWith("{\"last_seq\":")) {
+					setNextRow(gson.fromJson(row, Row.class));
+					hasNext = true;
+				}
+			}
+		} catch (Exception e) {
+			terminate();
+			throw new CouchDbException("Error reading continuous stream.", e);
+		}
+		if (!hasNext) {
+			terminate();
+		}
+		return hasNext;
+	}
 
-  private BufferedReader getReader() {
-    return reader;
-  }
+	private BufferedReader getReader() {
+		return reader;
+	}
 
-  private void setReader(BufferedReader reader) {
-    this.reader = reader;
-  }
+	private void setReader(BufferedReader reader) {
+		this.reader = reader;
+	}
 
-  private Row getNextRow() {
-    return nextRow;
-  }
+	private Row getNextRow() {
+		return nextRow;
+	}
 
-  private void setNextRow(Row nextRow) {
-    this.nextRow = nextRow;
-  }
+	private void setNextRow(Row nextRow) {
+		this.nextRow = nextRow;
+	}
 
-  private void terminate() {
-    httpRequest.abort();
-    CouchDbUtil.close(getReader());
-  }
+	private void terminate() {
+		httpRequest.abort();
+		CouchDbUtil.close(getReader());
+	}
 }
