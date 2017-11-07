@@ -51,9 +51,7 @@ public class BulkDocumentTest {
 		newDocs.add(new Foo());
 		newDocs.add(new JsonObject());
 
-		boolean allOrNothing = true;
-		
-		List<Response> responses = dbClient.bulk(newDocs, allOrNothing);
+		List<Response> responses = dbClient.bulk(newDocs);
 		
 		assertThat(responses.size(), is(2));
 	}

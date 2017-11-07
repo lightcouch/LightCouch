@@ -390,16 +390,14 @@ public abstract class CouchDbClientBase {
 	/**
 	 * Performs a Bulk Documents insert request.
 	 * @param objects The {@link List} of objects.
-	 * @param allOrNothing Indicates whether the request has <tt>all-or-nothing</tt> semantics.
 	 * @return {@code List<Response>} Containing the resulted entries.
 	 */
-	public List<Response> bulk(List<?> objects, boolean allOrNothing) {
+	public List<Response> bulk(List<?> objects) {
 		assertNotEmpty(objects, "objects");
 		HttpResponse response = null;
 		try { 
-			final String allOrNothingVal = allOrNothing ? "\"all_or_nothing\": true, " : "";
 			final URI uri = buildUri(getDBUri()).path("_bulk_docs").build();
-			final String json = String.format("{%s%s%s}", allOrNothingVal, "\"docs\": ", getGson().toJson(objects));
+			final String json = String.format("{%s%s}", "\"docs\": ", getGson().toJson(objects));
 			response = post(uri, json);
 			return getResponseList(response);
 		} finally {
