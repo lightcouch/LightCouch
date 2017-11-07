@@ -40,24 +40,6 @@ public class UpdateHandlerTest {
 	public static void tearDownClass() {
 		dbClient.shutdown();
 	}
-
-	@Test
-	public void updateHandler_queryString() {
-		final String oldValue = "foo";
-		final String newValue = "foo bar";
-		
-		Response response = dbClient.save(new Foo(null, oldValue));
-		
-		String query = "field=title&value=" + newValue;
-		
-		String output = dbClient.invokeUpdateHandler("example/example_update", response.getId(), query);
-		
-		// retrieve from db to verify
-		Foo foo = dbClient.find(Foo.class, response.getId());
-		
-		assertNotNull(output);
-		assertEquals(foo.getTitle(), newValue);
-	}
 	
 	@Test
 	public void updateHandler_queryParams() {
