@@ -605,7 +605,7 @@ int resultsPerPage = 15;
 // null param gets the first page
 Page<Foo> page = dbClient.view("example/foo")
   .reduce(false)
-  .queryPage(resultsPerPage, param, Foo.class); 
+  .queryPage(resultsPerPage, param, String.class, Foo.class);
 
 request.setAttribute("page", page);
 
