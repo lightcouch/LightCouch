@@ -397,7 +397,7 @@ public abstract class CouchDbClientBase {
 		assertNotEmpty(objects, "objects");
 		HttpResponse response = null;
 		try { 
-			String newEditsVal = newEdits ? "\"new_edits\": true, " : "\"new_edits\": false, ";
+			final String newEditsVal = newEdits ? "\"new_edits\": true, " : "\"new_edits\": false, ";
 			final String json = String.format("{%s%s%s}", newEditsVal, "\"docs\": ", getGson().toJson(objects));
 			final URI uri = buildUri(getDBUri()).path("_bulk_docs").build();
 			response = post(uri, json);
