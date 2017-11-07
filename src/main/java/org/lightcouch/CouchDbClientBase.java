@@ -388,16 +388,18 @@ public abstract class CouchDbClientBase {
 	}
 	
 	/**
-	 * Performs a Bulk Documents insert request.
-	 * @param objects The {@link List} of objects.
+	 * Performs bulk documents create and update request.
+	 * @param objects The {@link List} of documents objects.
+	 * @param newEdits If false, prevents the database from assigning documents new revision IDs.
 	 * @return {@code List<Response>} Containing the resulted entries.
 	 */
-	public List<Response> bulk(List<?> objects) {
+	public List<Response> bulk(List<?> objects, boolean newEdits) {
 		assertNotEmpty(objects, "objects");
 		HttpResponse response = null;
 		try { 
+			String newEditsVal = newEdits ? "\"new_edits\": true, " : "\"new_edits\": false, ";
+			final String json = String.format("{%s%s%s}", newEditsVal, "\"docs\": ", getGson().toJson(objects));
 			final URI uri = buildUri(getDBUri()).path("_bulk_docs").build();
-			final String json = String.format("{%s%s}", "\"docs\": ", getGson().toJson(objects));
 			response = post(uri, json);
 			return getResponseList(response);
 		} finally {
