@@ -181,7 +181,7 @@ public abstract class CouchDbClientBase {
 	public <T> T find(Class<T> classType, String id) {
 		assertNotEmpty(classType, "Class");
 		assertNotEmpty(id, "id");
-		final URI uri = buildUri(getDBUri()).path(id, true).build();
+		final URI uri = buildUri(getDBUri()).pathEncoded(id).build();
 		return get(uri, classType);
 	}
 	
@@ -197,7 +197,7 @@ public abstract class CouchDbClientBase {
 	public <T> T find(Class<T> classType, String id, Params params) {
 		assertNotEmpty(classType, "Class");
 		assertNotEmpty(id, "id");
-		final URI uri = buildUri(getDBUri()).path(id, true).query(params).build();
+		final URI uri = buildUri(getDBUri()).pathEncoded(id).query(params).build();
 		return get(uri, classType);
 	}
 	
@@ -214,7 +214,7 @@ public abstract class CouchDbClientBase {
 		assertNotEmpty(classType, "Class");
 		assertNotEmpty(id, "id");
 		assertNotEmpty(id, "rev");
-		final URI uri = buildUri(getDBUri()).path(id, true).query("rev", rev).build();
+		final URI uri = buildUri(getDBUri()).pathEncoded(id).query("rev", rev).build();
 		return get(uri, classType);
 	}
 	
@@ -295,7 +295,7 @@ public abstract class CouchDbClientBase {
 		assertNotEmpty(id, "id");
 		HttpResponse response = null;
 		try {
-			response = head(buildUri(getDBUri()).path(id, true).build());
+			response = head(buildUri(getDBUri()).pathEncoded(id).build());
 		} catch (NoDocumentException e) {
 			return false;
 		} finally {
@@ -383,7 +383,7 @@ public abstract class CouchDbClientBase {
 	public Response remove(String id, String rev) {
 		assertNotEmpty(id, "id");
 		assertNotEmpty(rev, "rev");
-		final URI uri = buildUri(getDBUri()).path(id, true).query("rev", rev).build();
+		final URI uri = buildUri(getDBUri()).pathEncoded(id).query("rev", rev).build();
 		return delete(uri);
 	}
 	
@@ -440,7 +440,7 @@ public abstract class CouchDbClientBase {
 		assertNotEmpty(name, "name");
 		assertNotEmpty(contentType, "ContentType");
 		assertNotEmpty(docId, "docId");
-		final URI uri = buildUri(getDBUri()).path(docId, true).path("/").path(name).query("rev", docRev).build();
+		final URI uri = buildUri(getDBUri()).pathEncoded(docId).path("/").path(name).query("rev", docRev).build();
 		return put(uri, in, contentType);
 	}
 	
@@ -603,7 +603,7 @@ public abstract class CouchDbClientBase {
 				assertNotEmpty(id, "id");
 				assertNotEmpty(rev, "rev");
 			}
-			final HttpPut put = new HttpPut(buildUri(uri).path(id, true).build());
+			final HttpPut put = new HttpPut(buildUri(uri).pathEncoded(id).build());
 			setEntity(put, json.toString());
 			response = executeRequest(put); 
 			return getResponse(response);
