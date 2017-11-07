@@ -51,7 +51,7 @@ public class BulkDocumentTest {
 		newDocs.add(new Foo());
 		newDocs.add(new JsonObject());
 
-		List<Response> responses = dbClient.bulk(newDocs);
+		List<Response> responses = dbClient.bulk(newDocs, true);
 		
 		assertThat(responses.size(), is(2));
 	}
