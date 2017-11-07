@@ -16,7 +16,6 @@
 
 package org.lightcouch;
 
-import static java.lang.String.format;
 import static org.lightcouch.CouchDbUtil.*;
 
 import java.io.InputStream;
@@ -31,7 +30,6 @@ import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.lightcouch.DesignDocument.MapReduce;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -80,11 +78,6 @@ public class View {
 	private static final String NEXT                     = "n";
 	private static final String PREVIOUS                 = "p";
 	
-	// temp views
-	private static final String TEMP_VIEWS_DIR           = "temp-views";
-	private static final String MAP_JS                   = "map.js";
-	private static final String REDUCE_JS                = "reduce.js";
-	
 	// view fields
 	private String key;
 	private String startKey;
@@ -107,7 +100,6 @@ public class View {
 	private URIBuilder uriBuilder;
 	
 	private String allDocsKeys; // bulk docs
-	private MapReduce mapRedtempViewM; // temp view
 	
 	View(CouchDbClientBase dbc, String viewId) {
 		assertNotEmpty(viewId, "View id");
@@ -133,9 +125,6 @@ public class View {
 		URI uri = uriBuilder.build();
 		if(allDocsKeys != null) { // bulk docs
 			return getStream(dbc.post(uri, allDocsKeys));
-		}
-		if(mapRedtempViewM != null) { // temp view
-			return getStream(dbc.post(uri, gson.toJson(mapRedtempViewM)));
 		}
 		
 		return dbc.get(uri);
@@ -542,31 +531,6 @@ public class View {
 	 */
 	public View keys(List<?> keys) {
 		this.allDocsKeys = String.format("{%s:%s}", gson.toJson("keys"), gson.toJson(keys));
-		return this;
-	}
-	
-	// temp views
-	
-	public View tempView(String id) {
-		assertNotEmpty(id, "id");
-		String viewPath = format("%s/%s/", TEMP_VIEWS_DIR, id);
-		List<String> dirList = listResources(viewPath);
-		assertNotEmpty(dirList, "Temp view directory");
-
-		mapRedtempViewM = new MapReduce();
-		for (String mapRed : dirList) {
-			String def = readFile(format("/%s%s", viewPath, mapRed));
-			if(MAP_JS.equals(mapRed))
-				mapRedtempViewM.setMap(def);
-			else if(REDUCE_JS.equals(mapRed))
-				mapRedtempViewM.setReduce(def);
-		} 
-		return this;
-	}
-	
-	public View tempView(MapReduce mapReduce) {
-		assertNotEmpty(mapReduce, "mapReduce");
-		mapRedtempViewM = mapReduce;
 		return this;
 	}
 	

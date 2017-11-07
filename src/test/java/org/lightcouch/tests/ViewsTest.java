@@ -147,17 +147,6 @@ public class ViewsTest {
 		assertThat(viewResult.getRows().size(), is(2));
 	}
 
-	@Test()
-	public void tempViews() {
-		dbClient.save(new Foo(generateUUID(), "some-val"));
-		List<Foo> list = dbClient.view("_temp_view")
-				.tempView("temp_1")
-				.includeDocs(true)
-				.reduce(false)
-				.query(Foo.class);
-		assertThat(list.size(), not(0));
-	}
-
 	@Test
 	public void allDocs() {
 		dbClient.save(new Foo());
