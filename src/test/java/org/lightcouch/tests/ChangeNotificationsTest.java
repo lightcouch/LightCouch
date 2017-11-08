@@ -83,7 +83,7 @@ public class ChangeNotificationsTest {
 		Changes changes = dbClient.changes()
 				.includeDocs(true)
 				.since(since)
-				.heartBeat(30000)
+				.heartBeat(2000)
 				.continuousChanges();
 
 		Response response = dbClient.save(new Foo());
@@ -92,10 +92,10 @@ public class ChangeNotificationsTest {
 			ChangesResult.Row feed = changes.next();
 			final JsonObject feedObject = feed.getDoc();
 			final String docId = feed.getId();
-			
+
 			assertEquals(response.getId(), docId);
 			assertNotNull(feedObject);
-			
+
 			changes.stop();
 		}
 	}
