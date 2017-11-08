@@ -193,6 +193,24 @@ public class ViewsTest {
 		assertThat(page.getPageNumber(), is(1));
 		assertThat(page.getResultList().size(), is(3));
 	}
+	
+	@Test
+	public void pagination_all_docs() {
+		for (int i = 0; i < 4; i++) {
+			Foo foo = new Foo(generateUUID(), "some-val");
+			dbClient.save(foo);
+		}
+
+		Page<JsonObject> page = dbClient.view("_all_docs").
+				queryPage(3, null, JsonObject.class);
+
+		assertFalse(page.isHasPrevious());
+		assertTrue(page.isHasNext());
+		assertThat(page.getResultFrom(), is(1));
+		assertThat(page.getResultTo(), is(3));
+		assertThat(page.getPageNumber(), is(1));
+		assertThat(page.getResultList().size(), is(3));
+	}
 
 	private static void init() {
 		try {
