@@ -297,8 +297,8 @@ public class View {
 		// init page, query view
 		final Page<T> page = new Page<T>();
 		final List<T> pageList = new ArrayList<T>();
-		final ViewResult<String, String, T> vr = queryView(String.class, String.class, classOfT);
-		final List<ViewResult<String, String, T>.Rows> rows = vr.getRows();
+		final ViewResult<String, Object, T> vr = queryView(String.class, Object.class, classOfT);
+		final List<ViewResult<String, Object, T>.Rows> rows = vr.getRows();
 		final int resultRows = rows.size();
 		final int offset = vr.getOffset();
 		final long totalRows = vr.getTotalRows();
@@ -356,8 +356,8 @@ public class View {
 		// init page, query view
 		final Page<T> page = new Page<T>();
 		final List<T> pageList = new ArrayList<T>();
-		final ViewResult<String, String, T> vr = queryView(String.class, String.class, classOfT);
-		final List<ViewResult<String, String, T>.Rows> rows = vr.getRows();
+		final ViewResult<String, Object, T> vr = queryView(String.class, Object.class, classOfT);
+		final List<ViewResult<String, Object, T>.Rows> rows = vr.getRows();
 		final int resultRows = rows.size();
 		final int offset = vr.getOffset();
 		final long totalRows = vr.getTotalRows();
