@@ -154,6 +154,23 @@ public class ViewsTest {
 				.query(JsonObject.class);
 		assertThat(allDocs.size(), not(0));
 	}
+	
+	@Test
+	public void keyContainSpecialCharacter() {
+		final String key = "+9876543/2";
+		
+		Foo foo = new Foo();
+		foo.setTitle(key);
+		
+		dbClient.save(foo);
+		
+		List<Foo> docs = dbClient.view("example/foo")
+				.includeDocs(true)
+				.key(key)
+				.query(Foo.class);
+
+		assertThat(docs.size(), not(0));
+	}
 
 	@Test
 	public void pagination() {
