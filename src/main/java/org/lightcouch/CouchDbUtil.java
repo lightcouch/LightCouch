@@ -46,8 +46,6 @@ import com.google.gson.JsonObject;
  */
 final class CouchDbUtil {
 
-  public static final String SPRING_BOOT_DIR = "BOOT-INF/classes/";
-
   private CouchDbUtil() {
 		// Utility class
 	}
@@ -101,6 +99,8 @@ final class CouchDbUtil {
 	
 	private static final String LINE_SEP = System.getProperty("line.separator");
 	
+	private static final String SPRING_BOOT_DIR = "BOOT-INF/classes/";
+	
 	/**
 	 * List directory contents for a resource folder. Not recursive.
 	 * This is basically a brute-force implementation.
@@ -124,9 +124,9 @@ final class CouchDbUtil {
 				Set<String> result = new HashSet<String>(); 
 				while(entries.hasMoreElements()) {
 					String name = entries.nextElement().getName();
-          if (name.startsWith(SPRING_BOOT_DIR)) {
-            name = name.substring(SPRING_BOOT_DIR.length());
-          }
+					if (name.startsWith(SPRING_BOOT_DIR)) {
+						name = name.substring(SPRING_BOOT_DIR.length());
+					}
 					if (name.startsWith(path)) { 
 						String entry = name.substring(path.length());
 						int checkSubdir = entry.indexOf("/");
