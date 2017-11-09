@@ -85,7 +85,7 @@ public class Document {
 	/**
 	 * Adds an in-line document attachment.
 	 * @param name The attachment file name
-	 * @param attachment 
+	 * @param attachment The attachment instance
 	 */
 	public void addAttachment(String name, Attachment attachment) {
 		if(attachments == null)

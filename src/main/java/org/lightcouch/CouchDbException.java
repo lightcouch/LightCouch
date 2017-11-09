@@ -18,7 +18,8 @@ package org.lightcouch;
 
 /**
  * Base runtime exception class.
- * @see {@link NoDocumentException}, {@link DocumentConflictException}
+ * @see {@link NoDocumentException}
+ * @see {@link DocumentConflictException}
  * @author Ahmed Yehia
  */
 public class CouchDbException extends RuntimeException {

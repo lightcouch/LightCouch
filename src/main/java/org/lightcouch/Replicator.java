@@ -119,6 +119,7 @@ public class Replicator {
 	
 	/**
 	 * Finds all documents in the replicator database. 
+	 * @return a list of {@link ReplicatorDocument}
 	 */
 	public List<ReplicatorDocument> findAll() {
 		InputStream instream = null;

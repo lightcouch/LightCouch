@@ -154,6 +154,7 @@ public class CouchDbContext {
 	/**
 	 * Request a database sends a list of UUIDs.
 	 * @param count The count of UUIDs.
+	 * @return a list of UUIDs
 	 */
 	public List<String> uuids(long count) {
 		final String uri = String.format("%s_uuids?count=%d", dbc.getBaseUri(), count);

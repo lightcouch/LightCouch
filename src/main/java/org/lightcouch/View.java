@@ -161,6 +161,7 @@ public class View {
 	 * Queries a view.
 	 * @param <K> Object type K (key)
 	 * @param <V> Object type V (value)
+	 * @param <T> The class type
 	 * @param classOfK The class of type K.
 	 * @param classOfV The class of type V.
 	 * @param classOfT The class of type T.
@@ -406,6 +407,7 @@ public class View {
 	
 	/**
 	 * @param key The key value, accepts a single value or multiple values for complex keys.
+	 * @return {@link View}
 	 */
 	public View key(Object... key) {
 		this.key = getKeyAsJson(key);
@@ -415,6 +417,7 @@ public class View {
 	
 	/**
 	 * @param startKey The start key value, accepts a single value or multiple values for complex keys.
+	 * @return {@link View}
 	 */
 	public View startKey(Object... startKey) {
 		this.startKey = getKeyAsJson(startKey);
@@ -422,6 +425,10 @@ public class View {
 		return this;
 	}
 	
+	/**
+	 * @param startKeyDocId The start key document id.
+	 * @return {@link View}
+	 */
 	public View startKeyDocId(String startKeyDocId) {
 		this.startKeyDocId = startKeyDocId;
 		uriBuilder.query("startkey_docid", this.startKeyDocId);
@@ -430,6 +437,7 @@ public class View {
 	
 	/**
 	 * @param endKey The end key value, accepts a single value or multiple values for complex keys.
+	 * @return {@link View}
 	 */
 	public View endKey(Object... endKey) {
 		this.endKey = getKeyAsJson(endKey);
@@ -437,12 +445,20 @@ public class View {
 		return this;
 	}
 	
+	/**
+	 * @param endKeyDocId The end key document id.
+	 * @return {@link View}
+	 */
 	public View endKeyDocId(String endKeyDocId) {
 		this.endKeyDocId = endKeyDocId;
 		uriBuilder.query("endkey_docid", this.endKeyDocId);
 		return this;
 	}
 	
+	/**
+	 * @param limit The limit value.
+	 * @return {@link View}
+	 */
 	public View limit(Integer limit) {
 		this.limit = limit;
 		uriBuilder.query("limit", this.limit);
@@ -451,6 +467,7 @@ public class View {
 	
 	/**
 	 * @param stale Accept values: ok | update_after (update_after as of CouchDB 1.1.0)
+	 * @return {@link View}
 	 */
 	public View stale(String stale) {
 		this.stale = stale;
@@ -460,6 +477,8 @@ public class View {
 	
 	/**
 	 * Reverses the reading direction, not the sort order.
+	 * @param descending The descending value true | false
+	 * @return {@link View}
 	 */
 	public View descending(Boolean descending) {
 		this.descending = Boolean.valueOf(gson.toJson(descending));
@@ -469,6 +488,7 @@ public class View {
 	
 	/**
 	 * @param skip Skips <i>n</i> number of documents.
+	 * @return {@link View}
 	 */
 	public View skip(Integer skip) {
 		this.skip = skip;
@@ -479,6 +499,7 @@ public class View {
 	/**
 	 * @param group Specifies whether the reduce function reduces the result to a set of keys, 
 	 * or to a single result. Defaults to false (single result).
+	 * @return {@link View}
 	 */
 	public View group(Boolean group) {
 		this.group = group;
@@ -486,6 +507,10 @@ public class View {
 		return this;
 	}
 	
+	/**
+	 * @param groupLevel The group level
+	 * @return {@link View}
+	 */
 	public View groupLevel(Integer groupLevel) {
 		this.groupLevel = groupLevel;
 		uriBuilder.query("group_level", this.groupLevel);
@@ -495,6 +520,7 @@ public class View {
 	/**
 	 * @param reduce Indicates whether to use the reduce function of the view,
 	 * defaults to true if the reduce function is defined.
+	 * @return {@link View}
 	 */
 	public View reduce(Boolean reduce) {
 		this.reduce = reduce;
@@ -502,6 +528,10 @@ public class View {
 		return this;
 	}
 	
+	/**
+	 * @param includeDocs Indicates whether to include documents
+	 * @return {@link View}
+	 */
 	public View includeDocs(Boolean includeDocs) {
 		this.includeDocs = includeDocs;
 		uriBuilder.query("include_docs", this.includeDocs);
@@ -511,6 +541,7 @@ public class View {
 	/**
 	 * @param inclusiveEnd Indicates whether the endkey is included in the result, 
 	 * defaults to true.
+	 * @return {@link View}
 	 */
 	public View inclusiveEnd(Boolean inclusiveEnd) {
 		this.inclusiveEnd = inclusiveEnd;
@@ -518,6 +549,10 @@ public class View {
 		return this;
 	}
 	
+	/**
+	 * @param updateSeq The updateSeq value 
+	 * @return {@link View}
+	 */
 	public View updateSeq(Boolean updateSeq) {
 		this.updateSeq = updateSeq;
 		uriBuilder.query("update_seq", this.updateSeq);
@@ -526,8 +561,8 @@ public class View {
 	
 	/**
 	 * Supplies a key list when calling <tt>_all_docs</tt> View.
-	 * @param keys
-	 * @return
+	 * @param keys The list of keys
+	 * @return {@link View}
 	 */
 	public View keys(List<?> keys) {
 		this.allDocsKeys = String.format("{%s:%s}", gson.toJson("keys"), gson.toJson(keys));

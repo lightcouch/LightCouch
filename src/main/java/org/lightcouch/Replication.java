@@ -89,6 +89,7 @@ public class Replication {
 
 	/**
 	 * Triggers a replication request. 
+	 * @return {@link ReplicationResult}
 	 */
 	public ReplicationResult trigger() {
 		assertNotEmpty(source, "Source");
@@ -162,6 +163,8 @@ public class Replication {
 	
 	/**
 	 * Starts a replication since an update sequence.  
+	 * @param sinceSeq The update sequence
+	 * @return {@link Replication}
 	 */
 	public Replication sinceSeq(Integer sinceSeq) {
 		this.sinceSeq = sinceSeq;

@@ -81,6 +81,7 @@ public class Changes {
 	/**
 	 * Requests Change notifications of feed type continuous.
 	 * <p>Feed notifications are accessed in an <i>iterator</i> style.
+	 * @return {@link Changes}
 	 */
 	public Changes continuousChanges() {
 		final URI uri = uriBuilder.query("feed", "continuous").build();
@@ -94,6 +95,7 @@ public class Changes {
 	/**
 	 * Checks whether a feed is available in the continuous stream, blocking 
 	 * until a feed is received. 
+	 * @return true If a feed is available
 	 */
 	public boolean hasNext() { 
 		return readNextRow();
@@ -115,6 +117,7 @@ public class Changes {
 
 	/**
 	 * Requests Change notifications of feed type normal.
+	 * @return {@link ChangesResult}
 	 */
 	public ChangesResult getChanges() {
 		final URI uri = uriBuilder.query("feed", "normal").build();

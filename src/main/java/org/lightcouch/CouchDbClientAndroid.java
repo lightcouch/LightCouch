@@ -74,21 +74,29 @@ import org.apache.http.protocol.HttpContext;
 public class CouchDbClientAndroid extends CouchDbClientBase {
 	
 	/**
-	 * @see CouchDbClient#CouchDbClient()
+	 * Constructs a new client instance.
 	 */
 	public CouchDbClientAndroid() {
 		super();
 	}
 	
 	/**
-	 * @see CouchDbClient#CouchDbClient(String)
+	 * Constructs a new client instance.
+	 * @param configFileName The configuration file
 	 */
 	public CouchDbClientAndroid(String configFileName) {
 		super(new CouchDbConfig(configFileName));
 	}
 	
 	/**
-	 *@see CouchDbClient#CouchDbClient(String, boolean, String, String, int, String, String)
+	 * Constructs a new client instance.
+	 * @param dbName The database name.
+	 * @param createDbIfNotExist To create a new database if it does not already exist.
+	 * @param protocol The protocol to use (i.e http or https)
+	 * @param host The database host address
+	 * @param port The database listening port
+	 * @param username The Username credential
+	 * @param password The Password credential
 	 */
 	public CouchDbClientAndroid(String dbName, boolean createDbIfNotExist, 
 			String protocol, String host, int port, String username, String password) { 		
@@ -96,7 +104,8 @@ public class CouchDbClientAndroid extends CouchDbClientBase {
 	}
 	
 	/**
-	 * @see CouchDbClient#CouchDbClient(CouchDbProperties)
+	 * Constructs a new client instance.
+	 * @param properties An object containing configuration properties.
 	 */
 	public CouchDbClientAndroid(CouchDbProperties properties) {
 		super(new CouchDbConfig(properties));

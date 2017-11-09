@@ -124,7 +124,7 @@ public abstract class CouchDbClientBase {
 	
 	/**
 	 * Provides access to DB server APIs.
-	 * @see CouchDbContext
+	 * @return {@link CouchDbContext}
 	 */
 	public CouchDbContext context() {
 		return context;
@@ -132,7 +132,7 @@ public abstract class CouchDbClientBase {
 	
 	/**
 	 * Provides access to CouchDB Design Documents.
-	 * @see CouchDbDesign
+	 * @return {@link CouchDbDesign}
 	 */
 	public CouchDbDesign design() {
 		return design;
@@ -140,7 +140,8 @@ public abstract class CouchDbClientBase {
 	
 	/**
 	 * Provides access to CouchDB <tt>View</tt> APIs.
-	 * @see View
+	 * @param viewId The view id.
+	 * @return {@link View}
 	 */
 	public View view(String viewId) {
 		return new View(this, viewId);
@@ -148,7 +149,7 @@ public abstract class CouchDbClientBase {
 
 	/**
 	 * Provides access to CouchDB <tt>replication</tt> APIs.
-	 * @see Replication
+	 * @return {@link Replication}
 	 */
 	public Replication replication() {
 		return new Replication(this);
@@ -156,7 +157,7 @@ public abstract class CouchDbClientBase {
 	
 	/**
 	 * Provides access to the <tt>replicator database</tt>.
-	 * @see Replicator
+	 * @return {@link Replicator}
 	 */
 	public Replicator replicator() {
 		return new Replicator(this);
@@ -164,7 +165,7 @@ public abstract class CouchDbClientBase {
 	
 	/**
 	 * Provides access to <tt>Change Notifications</tt> API.
-	 * @see Changes
+	 * @return {@link Changes}
 	 */
 	public Changes changes() {
 		return new Changes(this);
@@ -221,6 +222,7 @@ public abstract class CouchDbClientBase {
 	/**
 	 * This method finds any document given a URI.
 	 * <p>The URI must be URI-encoded.
+	 * @param <T> The class type.
 	 * @param classType The class of type T.
 	 * @param uri The URI as string.
 	 * @return An object of type T.
@@ -261,6 +263,7 @@ public abstract class CouchDbClientBase {
 	
 	/**
 	 * Find documents using a declarative JSON querying syntax.
+	 * @param <T> The class type.
 	 * @param jsonQuery The JSON query string.
 	 * @param classOfT The class of type T.
 	 * @return The result of the query as a {@code List<T> }
@@ -410,7 +413,7 @@ public abstract class CouchDbClientBase {
 	/**
 	 * Saves an attachment to a new document with a generated <tt>UUID</tt> as the document id.
 	 * <p>To retrieve an attachment, see {@link #find(String)}.
-	 * @param instream The {@link InputStream} holding the binary data.
+	 * @param in The {@link InputStream} holding the binary data.
 	 * @param name The attachment name.
 	 * @param contentType The attachment "Content-Type".
 	 * @return {@link Response}
@@ -427,12 +430,11 @@ public abstract class CouchDbClientBase {
 	 * Saves an attachment to an existing document given both a document id
 	 * and revision, or save to a new document given only the id, and rev as {@code null}.
 	 * <p>To retrieve an attachment, see {@link #find(String)}.
-	 * @param instream The {@link InputStream} holding the binary data.
+	 * @param in The {@link InputStream} holding the binary data.
 	 * @param name The attachment name.
 	 * @param contentType The attachment "Content-Type".
 	 * @param docId The document id to save the attachment under, or {@code null} to save under a new document.
 	 * @param docRev The document revision to save the attachment under, or {@code null} when saving to a new document.
-	 * @throws DocumentConflictException 
 	 * @return {@link Response}
 	 */
 	public Response saveAttachment(InputStream in, String name, String contentType, String docId, String docRev) {
@@ -446,7 +448,6 @@ public abstract class CouchDbClientBase {
 	
 	/**
 	 * Invokes an Update Handler.
-	 * <p>Use this method in particular when the docId contain special characters such as slashes (/).
 	 * <pre>
 	 * Params params = new Params()
 	 *	.addParam("field", "foo")
@@ -455,7 +456,7 @@ public abstract class CouchDbClientBase {
 	 * </pre>
 	 * @param updateHandlerUri The Update Handler URI, in the format: <code>designDoc/update1</code>
 	 * @param docId The document id to update.
-	 * @param query The query parameters as {@link Params}.
+	 * @param params The query parameters as {@link Params}.
 	 * @return The output of the request.
 	 */
 	public String invokeUpdateHandler(String updateHandlerUri, String docId, Params params) {
@@ -493,6 +494,7 @@ public abstract class CouchDbClientBase {
 	/**
 	 * Sets a {@link GsonBuilder} to create {@link Gson} instance.
 	 * <p>Useful for registering custom serializers/deserializers, such as JodaTime classes.
+	 * @param gsonBuilder The {@link GsonBuilder}
 	 */
 	public void setGsonBuilder(GsonBuilder gsonBuilder) {
 		this.gson = initGson(gsonBuilder);

@@ -122,7 +122,7 @@ public class CouchDbClient extends CouchDbClientBase implements Closeable {
 	/**
 	 * Constructs a new instance of this class.
 	 * @param properties An object containing configuration properties.
-	 * @see {@link CouchDbProperties}
+	 * @see CouchDbProperties
 	 */
 	public CouchDbClient(CouchDbProperties properties) {
 		super(new CouchDbConfig(properties));
