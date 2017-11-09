@@ -31,6 +31,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.CouchDbClient;
+import org.lightcouch.Document;
 import org.lightcouch.DocumentConflictException;
 import org.lightcouch.NoDocumentException;
 import org.lightcouch.Page;
@@ -214,12 +215,10 @@ public class ViewsTest {
 	@Test
 	public void pagination_all_docs() {
 		for (int i = 0; i < 4; i++) {
-			Foo foo = new Foo(generateUUID(), "some-val");
-			dbClient.save(foo);
+			dbClient.save(new Foo());
 		}
 
-		Page<JsonObject> page = dbClient.view("_all_docs").
-				queryPage(3, null, JsonObject.class);
+		Page<Document> page = dbClient.view("_all_docs").queryPage(3, null, Document.class);
 
 		assertFalse(page.isHasPrevious());
 		assertTrue(page.isHasNext());

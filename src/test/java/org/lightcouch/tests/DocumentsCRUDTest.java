@@ -88,7 +88,7 @@ public class DocumentsCRUDTest {
 
 	@Test
 	public void findAny() {
-		String uri = dbClient.getBaseUri() + "_stats";
+		String uri = dbClient.getBaseUri().toString();
 		JsonObject jsonObject = dbClient.findAny(JsonObject.class, uri);
 		assertNotNull(jsonObject);
 	}
