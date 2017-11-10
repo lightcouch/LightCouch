@@ -177,14 +177,15 @@ public class View {
 			vr.setOffset(getAsInt(json, "offset"));
 			vr.setUpdateSeq(getAsString(json, "update_seq"));
 			JsonArray jsonArray = json.getAsJsonArray("rows");
-			if(jsonArray.size() == 0) { // validate available rows
-				throw new NoDocumentException("No result was returned by this view query.");
-			}
 			for (JsonElement e : jsonArray) {
 				ViewResult<K, V, T>.Rows row = vr.new Rows();
 				row.setId(JsonToObject(gson, e, "id", String.class));
-				row.setKey(JsonToObject(gson, e, "key", classOfK));
-				row.setValue(JsonToObject(gson, e, "value", classOfV));
+				if (classOfK != null) {
+				    row.setKey(JsonToObject(gson, e, "key", classOfK));
+				}
+				if (classOfV != null) {
+				    row.setValue(JsonToObject(gson, e, "value", classOfV));
+				}
 				if(Boolean.TRUE.equals(this.includeDocs)) {
 					row.setDoc(JsonToObject(gson, e, "doc", classOfT));
 				}

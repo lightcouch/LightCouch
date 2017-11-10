@@ -114,6 +114,18 @@ public class ViewsTest {
 				.reduce(false)
 				.queryView(int[].class, String.class, Foo.class);
 		assertThat(viewResult.getRows().size(), is(3));
+
+		// not interested in keys
+		viewResult = dbClient.view("example/by_date")
+				.reduce(false)
+				.queryView(null, String.class, Foo.class);
+		assertThat(viewResult.getRows().size(), is(3));
+
+		// not interested in values
+		viewResult = dbClient.view("example/by_date")
+				.reduce(false)
+				.queryView(int[].class, null, Foo.class);
+		assertThat(viewResult.getRows().size(), is(3));
 	}
 
 	@Test
