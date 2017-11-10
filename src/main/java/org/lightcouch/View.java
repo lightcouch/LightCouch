@@ -175,7 +175,7 @@ public class View {
 			ViewResult<K, V, T> vr = new ViewResult<K, V, T>();
 			vr.setTotalRows(getAsLong(json, "total_rows")); 
 			vr.setOffset(getAsInt(json, "offset"));
-			vr.setUpdateSeq(getAsLong(json, "update_seq"));
+			vr.setUpdateSeq(getAsString(json, "update_seq"));
 			JsonArray jsonArray = json.getAsJsonArray("rows");
 			if(jsonArray.size() == 0) { // validate available rows
 				throw new NoDocumentException("No result was returned by this view query.");
@@ -233,8 +233,8 @@ public class View {
 			Reader reader = new InputStreamReader(instream = queryForStream(), Charsets.UTF_8);
 			JsonArray array = new JsonParser().parse(reader).
 							getAsJsonObject().get("rows").getAsJsonArray();
-			if(array.size() != 1) { // expect exactly 1 row
-				throw new NoDocumentException("Expecting exactly a single result of this view query, but was: " + array.size());
+			if(array.size() != 1) { 
+				throw new NoDocumentException("Expecting a single result but was: " + array.size());
 			}
 			return JsonToObject(gson, array.get(0), "value", classOfV);
 		} finally {
@@ -550,7 +550,7 @@ public class View {
 	}
 	
 	/**
-	 * @param updateSeq The updateSeq value 
+	 * @param updateSeq Indicates whether to include sequence id of the view 
 	 * @return {@link View}
 	 */
 	public View updateSeq(Boolean updateSeq) {

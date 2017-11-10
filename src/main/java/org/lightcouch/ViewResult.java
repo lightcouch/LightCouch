@@ -32,7 +32,7 @@ public class ViewResult<K, V, T> {
 	@SerializedName("total_rows")
 	private long totalRows; 
 	@SerializedName("update_seq")
-	private long updateSeq; 
+	private String updateSeq; 
 	private int offset;
 	private List<Rows> rows = new ArrayList<Rows>();
 	
@@ -40,7 +40,7 @@ public class ViewResult<K, V, T> {
 		return totalRows;
 	}
 
-	public long getUpdateSeq() {
+	public String getUpdateSeq() {
 		return updateSeq;
 	}
 
@@ -56,7 +56,7 @@ public class ViewResult<K, V, T> {
 		this.totalRows = totalRows;
 	}
 
-	public void setUpdateSeq(long updateSeq) {
+	public void setUpdateSeq(String updateSeq) {
 		this.updateSeq = updateSeq;
 	}
 
