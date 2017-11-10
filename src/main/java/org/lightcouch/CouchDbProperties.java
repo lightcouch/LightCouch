@@ -12,9 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *  
+ * MODIFICATION OF THIS FILE: According to the requirements of the above-stated
+ * license, I hereby state modifications to this file: Sebastian Haufe added the
+ * further parameters sslContext and hostnameVerifier and corresponding access
+ * methods.  This note should be removed once the pull request to the master has
+ * been granted.
  */
 
 package org.lightcouch;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 
 /**
  * Represents configuration properties for connecting to CouchDB.
@@ -40,6 +49,8 @@ public class CouchDbProperties {
 	private int maxConnections;
 	private String proxyHost;
 	private int proxyPort;
+	private SSLContext sslContext;
+	private HostnameVerifier hostnameVerifier;
 
 	public CouchDbProperties() {
 		// default constructor
@@ -107,6 +118,14 @@ public class CouchDbProperties {
 	public int getProxyPort() {
 		return proxyPort;
 	}
+	
+	public SSLContext getSSLContext() {
+		return sslContext;
+	}
+	
+	public HostnameVerifier getHostnameVerifier() {
+		return hostnameVerifier;
+	}
 
 	public CouchDbProperties setDbName(String dbName) {
 		this.dbName = dbName;
@@ -170,6 +189,16 @@ public class CouchDbProperties {
 
 	public CouchDbProperties setProxyPort(int proxyPort) {
 		this.proxyPort = proxyPort;
+		return this;
+	}
+	
+	public CouchDbProperties setSSLContext(SSLContext sslContext) {
+		this.sslContext = sslContext;
+		return this;
+	}
+	
+	public CouchDbProperties setHostnameVerifier(HostnameVerifier hostnameVerifier) {
+		this.hostnameVerifier = hostnameVerifier;
 		return this;
 	}
 

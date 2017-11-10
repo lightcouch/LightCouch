@@ -12,6 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * MODIFICATION OF THIS FILE: According to the requirements of the above-stated
+ * license, I hereby state modifications to this file: Sebastian Haufe changed
+ * method createRegistry to use newly introduced parameters sslContext and
+ * hostnameVerifier in the CouchDbProperties class in case they are explicitly
+ * set. Otherwise, the code behaves as before. This note should be removed once
+ * the pull request to the master has been granted.
  */
 
 package org.lightcouch;
@@ -25,6 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.Consts;
@@ -185,16 +193,24 @@ public class CouchDbClient extends CouchDbClientBase implements Closeable {
 				.<ConnectionSocketFactory> create();
 
 		if("https".equals(props.getProtocol())) {
-			SSLContext sslcontext = SSLContexts.custom()
-					.loadTrustMaterial(null, new TrustStrategy(){
-						public boolean isTrusted(X509Certificate[] chain, String authType)
-								throws CertificateException {
-							return true;
-						}
-					}).build();
+			SSLContext sslContext = props.getSSLContext();
+			if (sslContext == null) {
+				sslContext = SSLContexts.custom()
+						.loadTrustMaterial(null, new TrustStrategy(){
+							public boolean isTrusted(X509Certificate[] chain, String authType)
+									throws CertificateException {
+								return true;
+							}
+						}).build();
+			}
+			
+			HostnameVerifier hostnameVerifier = props.getHostnameVerifier();
+			if(hostnameVerifier == null) {
+				hostnameVerifier = new NoopHostnameVerifier();
+			}
 
-			return registry.register("https", new SSLConnectionSocketFactory(sslcontext, 
-					new NoopHostnameVerifier())).build();
+			return registry.register("https", new SSLConnectionSocketFactory(sslContext, 
+					hostnameVerifier)).build();
 		} else {
 			return registry.register("http", PlainConnectionSocketFactory.INSTANCE).build();
 		}

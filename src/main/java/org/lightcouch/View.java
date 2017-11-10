@@ -12,6 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * MODIFICATION OF THIS FILE: According to the requirements of the above-stated
+ * license, I hereby state modifications to this file: Sebastian Haufe added a
+ * further method "queryView" with an additional boolean argument
+ * "throwOnEmptyResult". This method modifies the existing one, the existing
+ * one now delegates to the new one. For this change, a pull request to the
+ * lightcouch master branch has been requested but not yet granted.
  */
 
 package org.lightcouch;
@@ -156,7 +163,7 @@ public class View {
 			close(instream);
 		}
 	}
-
+	
 	/**
 	 * Queries a view.
 	 * @param <K> Object type K (key)
@@ -168,6 +175,20 @@ public class View {
 	 * @return The View result entries.
 	 */
 	public <K, V, T> ViewResult<K, V, T> queryView(Class<K> classOfK, Class<V> classOfV, Class<T> classOfT) {
+	    	return queryView(classOfK, classOfV, classOfT, true);
+	}
+
+	/**
+	 * Queries a view.
+	 * @param <K> Object type K (key)
+	 * @param <V> Object type V (value)
+	 * @param classOfK The class of type K.
+	 * @param classOfV The class of type V.
+	 * @param classOfT The class of type T.
+	 * @param throwOnEmptyResult
+	 * @return The View result entries.
+	 */
+	public <K, V, T> ViewResult<K, V, T> queryView(Class<K> classOfK, Class<V> classOfV, Class<T> classOfT, boolean throwOnEmptyResult) {
 		InputStream instream = null;
 		try {  
 			Reader reader = new InputStreamReader(instream = queryForStream(), Charsets.UTF_8);
@@ -177,7 +198,7 @@ public class View {
 			vr.setOffset(getAsInt(json, "offset"));
 			vr.setUpdateSeq(getAsLong(json, "update_seq"));
 			JsonArray jsonArray = json.getAsJsonArray("rows");
-			if(jsonArray.size() == 0) { // validate available rows
+			if(jsonArray.size() == 0 && throwOnEmptyResult) { // validate available rows
 				throw new NoDocumentException("No result was returned by this view query.");
 			}
 			for (JsonElement e : jsonArray) {
