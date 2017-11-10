@@ -251,7 +251,7 @@ public class Replicator {
 		return this;
 	}
 	
-	public Replicator sinceSeq(Integer sinceSeq) {
+	public Replicator sinceSeq(String sinceSeq) {
 		replicatorDoc.setSinceSeq(sinceSeq);
 		return this;
 	}

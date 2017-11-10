@@ -72,7 +72,7 @@ public class Replication {
 	private String[] docIds;      
 	private String proxy;       
 	private Boolean createTarget;
-	private Integer sinceSeq;
+	private String sinceSeq;
 	
 	// OAuth
 	private JsonObject targetOauth;
@@ -166,7 +166,7 @@ public class Replication {
 	 * @param sinceSeq The update sequence
 	 * @return {@link Replication}
 	 */
-	public Replication sinceSeq(Integer sinceSeq) {
+	public Replication sinceSeq(String sinceSeq) {
 		this.sinceSeq = sinceSeq;
 		return this;
 	}

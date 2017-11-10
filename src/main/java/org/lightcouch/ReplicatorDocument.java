@@ -63,7 +63,7 @@ public class ReplicatorDocument extends Document {
 	@SerializedName("user_ctx")
 	private UserCtx userCtx;
 	@SerializedName("since_seq")
-	private Integer sinceSeq;
+	private String sinceSeq;
 
 	public String getSource() {
 		return source;
@@ -201,11 +201,11 @@ public class ReplicatorDocument extends Document {
 		this.retriesPerRequest = retriesPerRequest;
 	}
 
-	public Integer getSinceSeq() {
+	public String getSinceSeq() {
 		return sinceSeq;
 	}
 
-	public void setSinceSeq(Integer sinceSeq) {
+	public void setSinceSeq(String sinceSeq) {
 		this.sinceSeq = sinceSeq;
 	}
 
