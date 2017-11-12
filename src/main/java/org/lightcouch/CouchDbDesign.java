@@ -50,7 +50,6 @@ import com.google.gson.JsonObject;
  * // read from the database
  * DesignDocument design2 = dbClient.design().getFromDb("_design/example");
  * </pre>
- * @see {@link CouchDbClient#design()} to access the API.
  * @see DesignDocument
  * @since 0.0.2
  * @author Ahmed Yehia
