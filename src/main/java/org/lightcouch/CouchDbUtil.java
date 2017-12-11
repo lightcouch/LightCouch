@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.JarURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -118,8 +119,8 @@ final class CouchDbUtil {
 				return Arrays.asList(new File(dirURL.toURI()).list());
 			}
 			if (dirURL != null && dirURL.getProtocol().equals("jar")) {
-				String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); 
-				JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+				JarURLConnection jarConn = (JarURLConnection)dirURL.openConnection();
+				JarFile jar = jarConn.getJarFile();
 				Enumeration<JarEntry> entries = jar.entries(); 
 				Set<String> result = new HashSet<String>(); 
 				while(entries.hasMoreElements()) {
@@ -138,7 +139,7 @@ final class CouchDbUtil {
 						}
 					}
 				}
-				close(jar);
+				jar.close();
 				return new ArrayList<String>(result);
 			} 
 			return null;
