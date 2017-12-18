@@ -23,6 +23,8 @@ import java.net.URI;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.lightcouch.ChangesResult.Row;
 
 import com.google.gson.Gson;
@@ -56,6 +58,14 @@ import com.google.gson.Gson;
  *  JsonObject doc = feed.getDoc();
  *	// changes.stop(); // stop continuous feed
  * }
+ * 
+ * Selector filter:
+ * ChangesResult changeResult = dbClient.changes()
+ *	.since(since) 
+ *	.limit(10)
+ *	.selector("{\"selector":{\"_deleted\":true}}")
+ *	.getChanges();
+ *
  * </pre>
  * @see ChangesResult
  * @since 0.0.2
@@ -64,13 +74,15 @@ import com.google.gson.Gson;
 public class Changes {
 	
 	private BufferedReader reader;
-	private HttpGet httpGet;
+	private HttpUriRequest httpRequest;
 	private Row nextRow;
 	private boolean stop;
 	
 	private CouchDbClientBase dbc;
 	private Gson gson;
 	private URIBuilder uriBuilder;
+	
+	private String selector;
 	
 	Changes(CouchDbClientBase dbc) {
 		this.dbc = dbc;
@@ -85,10 +97,19 @@ public class Changes {
 	 */
 	public Changes continuousChanges() {
 		final URI uri = uriBuilder.query("feed", "continuous").build();
-		httpGet = new HttpGet(uri);
-		final InputStream in = dbc.get(httpGet);
-		final InputStreamReader is = new InputStreamReader(in, Charsets.UTF_8);
-		setReader(new BufferedReader(is));
+		if (selector == null) {
+			final HttpGet get = new HttpGet(uri);
+			httpRequest = get;
+			final InputStream in = dbc.get(get);
+			final InputStreamReader is = new InputStreamReader(in, Charsets.UTF_8);
+			setReader(new BufferedReader(is));
+		} else {
+			final HttpPost post = new HttpPost(uri);
+			httpRequest = post;
+			final InputStream in = dbc.post(post, selector);
+			final InputStreamReader is = new InputStreamReader(in, Charsets.UTF_8);
+			setReader(new BufferedReader(is));
+		}
 		return this;
 	}
 
@@ -121,7 +142,11 @@ public class Changes {
 	 */
 	public ChangesResult getChanges() {
 		final URI uri = uriBuilder.query("feed", "normal").build();
-		return dbc.get(uri, ChangesResult.class);
+		if (selector == null) {
+			return dbc.get(uri, ChangesResult.class);
+		} else {
+			return dbc.post(uri, selector, ChangesResult.class);
+		}
 	}
 
 	// Query Params
@@ -148,6 +173,12 @@ public class Changes {
 
 	public Changes filter(String filter) {
 		uriBuilder.query("filter", filter);
+		return this;
+	}
+	
+	public Changes selector(String json) {
+		uriBuilder.query("filter", "_selector");
+		this.selector = json;
 		return this;
 	}
 	
@@ -206,7 +237,7 @@ public class Changes {
 	}
 	
 	private void terminate() {
-		httpGet.abort();
+		httpRequest.abort();
 		CouchDbUtil.close(getReader());
 	}
 }
