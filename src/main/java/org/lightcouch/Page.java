@@ -18,6 +18,8 @@ package org.lightcouch;
 
 import java.util.List;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Holds data of a page as result of a view pagination query. 
  * @see View#queryPage(int, String, Class)
@@ -25,15 +27,15 @@ import java.util.List;
  * @author Ahmed Yehia
  */
 public class Page<T> {
-	private boolean isHasPrevious;
-	private boolean isHasNext;
-	private List<T> resultList;
-	private long totalResults;
-	private int resultFrom;
-	private int resultTo;
-	private int pageNumber;
-	private String nextParam;
-	private String previousParam;
+	@SerializedName("has_previous") private boolean isHasPrevious;
+	@SerializedName("has_next") private boolean isHasNext;
+	@SerializedName("results") private List<T> resultList;
+	@SerializedName("total_results") private long totalResults;
+	@SerializedName("results_from") private int resultFrom;
+	@SerializedName("results_to") private int resultTo;
+	@SerializedName("page_number") private int pageNumber;
+	transient private String nextParam;
+	transient private String previousParam;
 
 	public boolean isHasPrevious() {
 		return isHasPrevious;
