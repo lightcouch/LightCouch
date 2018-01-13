@@ -146,6 +146,16 @@ public abstract class CouchDbClientBase {
 	public View view(String viewId) {
 		return new View(this, viewId);
 	}
+	
+	/**
+	 * Provides access to CouchDB <tt>View</tt> APIS, passed through a list.
+	 * @param viewId the view id.
+	 * @param listId the list id.
+	 * @return {@link View}
+	 */
+	public View list(String viewId, String listId, String mimeType) {
+		return new ListView(this, viewId, listId, mimeType);
+	}
 
 	/**
 	 * Provides access to CouchDB <tt>replication</tt> APIs.
@@ -533,7 +543,17 @@ public abstract class CouchDbClientBase {
 	}
 	
 	/**
-	 * Performs a HTTP GET request. 
+	 * Performs a HTTP GET request with a given mime-type
+	 * @return {@link InputStream} 
+	 */
+	InputStream get(URI uri, String mimeType) {
+		HttpGet get = new HttpGet(uri);
+		get.addHeader("Accept", mimeType);
+		return get(get);
+	}
+	
+	/**
+	 * Performs a HTTP GET request with the default mime-type of application/json
 	 * @return {@link InputStream} 
 	 */
 	InputStream get(URI uri) {

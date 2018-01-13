@@ -78,6 +78,14 @@ public class View {
 	private static final String NEXT                     = "n";
 	private static final String PREVIOUS                 = "p";
 	
+	private static final String viewPath(String viewId) {
+		if (!viewId.contains("/"))
+			return viewId;
+		
+		String[] parts = viewId.split("/");
+		return String.format("_design/%s/_view/%s", parts[0], parts[1]);
+	}
+	
 	// view fields
 	private String key;
 	private String startKey;
@@ -95,29 +103,24 @@ public class View {
 	private Boolean inclusiveEnd;
 	private Boolean updateSeq;
 	
-	private CouchDbClientBase dbc;
-	private Gson gson;
-	private URIBuilder uriBuilder;
+	protected CouchDbClientBase dbc;
+	protected Gson gson;
+	protected URIBuilder uriBuilder;
 	
-	private String allDocsKeys; // bulk docs
-	
+	protected String allDocsKeys; // bulk docs
+
 	View(CouchDbClientBase dbc, String viewId) {
 		assertNotEmpty(viewId, "View id");
 		this.dbc = dbc;
 		this.gson = dbc.getGson();
 		
-		String view = viewId;
-		if(viewId.contains("/")) {
-			String[] v = viewId.split("/");
-			view = String.format("_design/%s/_view/%s", v[0], v[1]);
-		}
-		this.uriBuilder = URIBuilder.buildUri(dbc.getDBUri()).path(view);
+		this.uriBuilder = URIBuilder.buildUri(dbc.getDBUri()).path(viewPath(viewId));
 	}
 	
 	// Query options
 	
 	/**
-	 * Queries a view as an {@link InputStream}
+	 * Queries a view as an {@link InputStream}, potentially requesting a non-default mime-type if given
 	 * <p>The stream should be properly closed after usage, as to avoid connection leaks.
 	 * @return The result as an {@link InputStream}.
 	 */
@@ -126,7 +129,7 @@ public class View {
 		if(allDocsKeys != null) { // bulk docs
 			return getStream(dbc.post(uri, allDocsKeys));
 		}
-		
+
 		return dbc.get(uri);
 	}
 	
