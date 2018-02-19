@@ -57,10 +57,11 @@ public class ReplicationTest {
 
 	@Test
 	public void replication() {
+	    dbClient.getDBUri();
 		ReplicationResult result = dbClient.replication()
 				.createTarget(true)
-				.source(dbClient.getDBUri().toString())
-				.target(dbClient2.getDBUri().toString())
+				.source(dbClient.getDBUriWithCredentials().toString())
+				.target(dbClient2.getDBUriWithCredentials().toString())
 				.trigger();
 
 		List<ReplicationHistory> histories = result.getHistories();
@@ -74,8 +75,8 @@ public class ReplicationTest {
     	
 		dbClient.replication()
 				.createTarget(true)
-				.source(dbClient.getDBUri().toString())
-				.target(dbClient2.getDBUri().toString())
+				.source(dbClient.getDBUriWithCredentials().toString())
+				.target(dbClient2.getDBUriWithCredentials().toString())
 				.filter("example/example_filter")
 				.queryParams(queryParams)
 				.trigger();
@@ -90,8 +91,8 @@ public class ReplicationTest {
 
 		// trigger a replication
 		Response response = dbClient.replicator()
-				.source(dbClient.getDBUri().toString())
-				.target(dbClient2.getDBUri().toString()).continuous(true)
+				.source(dbClient.getDBUriWithCredentials().toString())
+				.target(dbClient2.getDBUriWithCredentials().toString()).continuous(true)
 				.createTarget(true)
 				.save();
 		
@@ -122,8 +123,8 @@ public class ReplicationTest {
 		
 		dbClient.save(foodb1); 
 		
-		dbClient.replication().source(dbClient.getDBUri().toString())
-				.target(dbClient2.getDBUri().toString()).trigger();
+		dbClient.replication().source(dbClient.getDBUriWithCredentials().toString())
+				.target(dbClient2.getDBUriWithCredentials().toString()).trigger();
 
 		foodb2 = dbClient2.find(Foo.class, docId); 
 		foodb2.setTitle("titleY"); 
@@ -133,8 +134,8 @@ public class ReplicationTest {
 		foodb1.setTitle("titleZ"); 
 		dbClient.update(foodb1); 
 
-		dbClient.replication().source(dbClient.getDBUri().toString())
-				.target(dbClient2.getDBUri().toString()).trigger();
+		dbClient.replication().source(dbClient.getDBUriWithCredentials().toString())
+				.target(dbClient2.getDBUriWithCredentials().toString()).trigger();
 
 		ViewResult<String[], String, Foo> conflicts = dbClient2.view("conflicts/conflict")
 				.includeDocs(true).queryView(String[].class, String.class, Foo.class);
