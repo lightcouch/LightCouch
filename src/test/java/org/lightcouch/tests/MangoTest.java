@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 import java.util.List;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.CouchDbClient;
@@ -39,9 +40,17 @@ public class MangoTest {
 	public static void tearDownClass() {
 		dbClient.shutdown();
 	}
+	
+	private boolean isCouchDB2() {
+        String version = dbClient.context().serverVersion();
+        return version.startsWith("2");
+    }
 
 	@Test
 	public void findDocs() {
+	    
+	    Assume.assumeTrue(isCouchDB2());
+	    
 		dbClient.save(new Foo());
 		
 		String jsonQuery = "{ \"selector\": { \"_id\": { \"$gt\": null } }, \"limit\":2 }";

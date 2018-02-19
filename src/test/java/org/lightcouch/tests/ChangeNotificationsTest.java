@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import java.util.List;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.Changes;
@@ -47,6 +48,11 @@ public class ChangeNotificationsTest {
 	@AfterClass
 	public static void tearDownClass() {
 		dbClient.shutdown();
+	}
+	
+	private boolean isCouchDB2() {
+	    String version = dbClient.context().serverVersion();
+	    return version.startsWith("2");
 	}
 	
 	@Test
@@ -75,8 +81,10 @@ public class ChangeNotificationsTest {
 
 	@Test
 	public void changes_normalFeed_selector() {
+	    
+	    Assume.assumeTrue(isCouchDB2());
+	    
 		dbClient.save(new Foo());
-
 		ChangesResult changes = dbClient.changes().includeDocs(true).limit(1)
 				.selector("{\"selector\":{\"_id\": {\"$gt\": null}}}").getChanges();
 
@@ -124,6 +132,9 @@ public class ChangeNotificationsTest {
 	
 	@Test
 	public void changes_continuousFeed_selector() {
+	    
+	    Assume.assumeTrue(isCouchDB2());
+	    
 		dbClient.save(new Foo());
 
 		CouchDbInfo dbInfo = dbClient.context().info();
