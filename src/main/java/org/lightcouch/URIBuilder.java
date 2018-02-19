@@ -35,7 +35,9 @@ class URIBuilder {
 	private int port;
 	private String path = "";
 	private final List<String> params = new ArrayList<String>();
-
+    private String user;
+    private String password;
+	
 	public static URIBuilder buildUri() {
 		return new URIBuilder();
 	}
@@ -94,7 +96,25 @@ class URIBuilder {
 		return this;
 	}
 
+	public URIBuilder user(String user) {
+        this.user = user;
+        return this;
+    }
+	
+	public URIBuilder password(String password) {
+        this.password = password;
+        return this;
+    }
+	
 	public URI build() {
+	    return build(false);
+	}
+	
+	public URI buildWithCredentials() {
+        return build(true);
+    }
+	
+	private URI build(boolean includeCredentials) {
 		final StringBuilder query = new StringBuilder();
 		
 		for (int i = 0; i < params.size(); i++) {
@@ -103,7 +123,12 @@ class URIBuilder {
 		}
 		
 		String q = (query.length() == 0) ? "" : "?" + query;
-		String uri = String.format("%s://%s:%s%s%s", new Object[] { scheme, host, port, path, q });
+		String uri = "";
+		if (includeCredentials && user!=null && password != null) {
+		    uri = String.format("%s://%s:%s@%s:%s%s%s", scheme, user,password, host, port, path, q );
+		} else {
+		  uri = String.format("%s://%s:%s%s%s", scheme, host, port, path, q );
+		}
 		
 		try {
 			return new URI(uri);
@@ -112,5 +137,5 @@ class URIBuilder {
 		}
 
 	}
-
+	
 }
