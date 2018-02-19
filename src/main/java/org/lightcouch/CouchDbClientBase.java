@@ -622,6 +622,34 @@ public abstract class CouchDbClientBase {
 	}
 	
 	/**
+	 * Performs a HTTP POST request.
+	 *
+	 * @return {@link HttpResponse}
+	 */
+	InputStream post(HttpPost post, String json) {
+		setEntity(post, json);
+		HttpResponse resp = executeRequest(post);
+		return getStream(resp);
+	}
+	
+	/**
+	 * Performs a HTTP POST request.
+	 *
+	 * @return An object of type T
+	 */
+	<T> T post(URI uri, String json, Class<T> classType) {
+		InputStream in = null;
+		try {
+			in = getStream(post(uri, json));
+			return getGson().fromJson(new InputStreamReader(in, "UTF-8"), classType);
+		} catch (UnsupportedEncodingException e) {
+			throw new CouchDbException(e);
+		} finally {
+			close(in);
+		}
+	}
+	
+	/**
 	 * Performs a HTTP DELETE request.
 	 * @return {@link Response}
 	 */
