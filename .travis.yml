@@ -26,4 +26,4 @@ jobs:
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb.properties
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb-2.properties
     script:
-      - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
+      - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
