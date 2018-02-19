@@ -41,7 +41,7 @@ public class MangoTest {
 		dbClient.shutdown();
 	}
 	
-	private boolean isCouchDB2() {
+    private boolean isCouchDB2() {
         String version = dbClient.context().serverVersion();
         return version.startsWith("2");
     }
