@@ -27,16 +27,14 @@ import java.util.UUID;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.lightcouch.CouchDbClient;
 import org.lightcouch.ReplicationResult;
+import org.lightcouch.ReplicationResult.ReplicationHistory;
 import org.lightcouch.ReplicatorDocument;
 import org.lightcouch.Response;
 import org.lightcouch.ViewResult;
-import org.lightcouch.ReplicationResult.ReplicationHistory;
 
-@Ignore
 public class ReplicationTest {
 	
 	private static CouchDbClient dbClient;

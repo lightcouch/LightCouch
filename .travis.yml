@@ -6,7 +6,7 @@ addons:
     organization: "indaba"
     branches:
       - master
-      - travis-work
+      - test-replicator
 
 services:
   - docker
