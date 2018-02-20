@@ -27,25 +27,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.CouchDbClient;
 
-public class MangoTest {
-
-	private static CouchDbClient dbClient;
-
-	@BeforeClass
-	public static void setUpClass() {
-		dbClient = new CouchDbClient();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		dbClient.shutdown();
-	}
+public class MangoTest extends CouchDbTestBase {	
 	
-    private boolean isCouchDB2() {
-        String version = dbClient.context().serverVersion();
-        return version.startsWith("2");
-    }
-
 	@Test
 	public void findDocs() {
 	    

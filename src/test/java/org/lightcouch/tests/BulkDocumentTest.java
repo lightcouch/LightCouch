@@ -23,28 +23,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.lightcouch.CouchDbClient;
 import org.lightcouch.Response;
 
 import com.google.gson.JsonObject;
 
-public class BulkDocumentTest {
-
-	private static CouchDbClient dbClient;
-
-	@BeforeClass
-	public static void setUpClass() {
-		dbClient = new CouchDbClient();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		dbClient.shutdown();
-	}
-
+public class BulkDocumentTest extends CouchDbTestBase {
+	
 	@Test
 	public void bulkModifyDocs() {
 		List<Object> newDocs = new ArrayList<Object>();

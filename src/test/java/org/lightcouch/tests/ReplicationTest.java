@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import org.lightcouch.URIBuilder;
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.CouchDbClient;
@@ -44,13 +45,16 @@ public class ReplicationTest {
 	private static URI dbClientUri;
 	private static URI dbClient2Uri;
 	
+	private static CouchDbConfigTest dbClientConfig; 
+	private static CouchDbConfigTest dbClient2Config;
+	
 	@BeforeClass
 	public static void setUpClass() {
 		dbClient = new CouchDbClient();
 		dbClient2 = new CouchDbClient("couchdb-2.properties");
 		
-		CouchDbConfigTest dbClientConfig = new CouchDbConfigTest();
-		CouchDbConfigTest dbClient2Config = new CouchDbConfigTest("couchdb-2.properties");
+		dbClientConfig = new CouchDbConfigTest();
+		dbClient2Config = new CouchDbConfigTest("couchdb-2.properties");
 		
 		dbClientUri = buildUri(dbClient.getDBUri()).user(dbClientConfig.getProperties().getUsername()).password(dbClientConfig.getProperties().getPassword()).buildWithCredentials();
 		dbClient2Uri = buildUri(dbClient2.getDBUri()).user(dbClient2Config.getProperties().getUsername()).password(dbClient2Config.getProperties().getPassword()).buildWithCredentials();
@@ -61,6 +65,10 @@ public class ReplicationTest {
 
 	@AfterClass
 	public static void tearDownClass() {
+	    
+	    dbClient.context().deleteDB(dbClientConfig.getProperties().getDbName() , "delete database");
+	    dbClient.context().deleteDB(dbClient2Config.getProperties().getDbName() , "delete database");
+	    
 		dbClient.shutdown();
 		dbClient2.shutdown();
 	}
@@ -94,15 +102,15 @@ public class ReplicationTest {
 
 	@Test
 	public void replicatorDB() {
+	    
 		String version = dbClient.context().serverVersion();
-		if (version.startsWith("0") || version.startsWith("1.0")) {
-			return; 
-		}
-
+		Assume.assumeTrue(!(version.startsWith("0") || version.startsWith("1.0")));
+		
 		// trigger a replication
 		Response response = dbClient.replicator()
 				.source(dbClientUri.toString())
-				.target(dbClient2Uri.toString()).continuous(true)
+				.target(dbClient2Uri.toString())
+				.continuous(true)
 				.createTarget(true)
 				.save();
 		

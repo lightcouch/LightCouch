@@ -26,27 +26,12 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.Attachment;
-import org.lightcouch.CouchDbClient;
 import org.lightcouch.Params;
 import org.lightcouch.Response;
 
-public class AttachmentsTest {
-
-	private static CouchDbClient dbClient;
-
-	@BeforeClass
-	public static void setUpClass() {
-		dbClient = new CouchDbClient();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		dbClient.shutdown();
-	}
+public class AttachmentsTest extends CouchDbTestBase {
 
 	@Test
 	public void attachmentInline() {

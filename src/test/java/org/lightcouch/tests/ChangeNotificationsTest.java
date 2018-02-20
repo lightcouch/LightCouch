@@ -23,38 +23,18 @@ import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.junit.AfterClass;
 import org.junit.Assume;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.Changes;
 import org.lightcouch.ChangesResult;
 import org.lightcouch.ChangesResult.Row;
-import org.lightcouch.CouchDbClient;
 import org.lightcouch.CouchDbInfo;
 import org.lightcouch.Response;
 
 import com.google.gson.JsonObject;
 
-public class ChangeNotificationsTest {
-	
-	private static CouchDbClient dbClient;
-
-	@BeforeClass
-	public static void setUpClass() {
-		dbClient = new CouchDbClient();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		dbClient.shutdown();
-	}
-	
-	private boolean isCouchDB2() {
-	    String version = dbClient.context().serverVersion();
-	    return version.startsWith("2");
-	}
-	
+public class ChangeNotificationsTest extends CouchDbTestBase {
+		
 	@Test
 	public void changes_normalFeed() {
 		dbClient.save(new Foo()); 

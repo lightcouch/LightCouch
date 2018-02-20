@@ -19,28 +19,20 @@ package org.lightcouch.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.CouchDbClient;
 import org.lightcouch.Params;
 import org.lightcouch.Response;
 
-public class UpdateHandlerTest {
-
-	private static CouchDbClient dbClient;
-
-	@BeforeClass
-	public static void setUpClass() {
-		dbClient = new CouchDbClient();
-		dbClient.syncDesignDocsWithDb();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		dbClient.shutdown();
-	}
+public class UpdateHandlerTest extends CouchDbTestBase {
 	
+    @BeforeClass
+    public static void setUpClass() {
+        dbClient = new CouchDbClient();
+        dbClient.syncDesignDocsWithDb();
+    }
+    
 	@Test
 	public void updateHandler_queryParams() {
 		final String oldValue = "foo";
@@ -51,6 +43,7 @@ public class UpdateHandlerTest {
 		Params params = new Params()
 					.addParam("field", "title")
 					.addParam("value", newValue);
+		
 		String output = dbClient.invokeUpdateHandler("example/example_update", response.getId(), params);
 		
 		// retrieve from db to verify

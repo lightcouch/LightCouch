@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.CouchDbClient;
@@ -39,23 +38,16 @@ import org.lightcouch.ViewResult;
 
 import com.google.gson.JsonObject;
 
-public class ViewsTest {
-
-	private static CouchDbClient dbClient;
+public class ViewsTest extends CouchDbTestBase {
 
 	@BeforeClass
 	public static void setUpClass() {
 		dbClient = new CouchDbClient();
-
 		dbClient.syncDesignDocsWithDb();
 		
 		init(); 
 	}
 
-	@AfterClass
-	public static void tearDownClass() {
-		dbClient.shutdown();
-	}
 
 	@Test
 	public void queryView() {

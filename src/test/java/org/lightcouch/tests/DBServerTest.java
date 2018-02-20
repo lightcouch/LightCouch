@@ -23,25 +23,11 @@ import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.lightcouch.CouchDbClient;
 import org.lightcouch.CouchDbInfo;
 
-public class DBServerTest {
+public class DBServerTest extends CouchDbTestBase {
 
-	private static CouchDbClient dbClient;
-
-	@BeforeClass
-	public static void setUpClass() {
-		dbClient = new CouchDbClient();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		dbClient.shutdown();
-	}
 
 	@Test
 	public void dbInfo() {
