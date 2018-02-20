@@ -27,11 +27,15 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.lightcouch.URIBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lightcouch.CouchDbClient;
+import org.lightcouch.CouchDbException;
+import org.lightcouch.DocumentConflictException;
 import org.lightcouch.ReplicationResult;
 import org.lightcouch.ReplicationResult.ReplicationHistory;
 import org.lightcouch.ReplicatorDocument;
@@ -47,6 +51,8 @@ public class ReplicationTest {
 	
 	private static CouchDbConfigTest dbClientConfig; 
 	private static CouchDbConfigTest dbClient2Config;
+	
+	private static Log LOG = LogFactory.getLog(ReplicationTest.class);
 	
 	@BeforeClass
 	public static void setUpClass() {
@@ -120,23 +126,38 @@ public class ReplicationTest {
 		assertThat(replicatorDocs.size(), is(not(0))); 
 		
 		// find replicator doc
+		String id = response.getId();
 		ReplicatorDocument replicatorDoc = dbClient.replicator()
-				.replicatorDocId(response.getId())
+				.replicatorDocId(id)
 				.find();
-
-		// Wait until complete
-		while ("triggered".equals(replicatorDoc.getReplicationState())) {
-		    replicatorDoc = dbClient.replicator()
-	                .replicatorDocId(response.getId())
-	                .find();
-		    Thread.sleep(10);
+		
+		LOG.info("Replication state "+replicatorDoc.getReplicationState());
+		    
+		// Wait until cancelled
+		boolean cancelled=false;
+		while (!cancelled) {
+		    cancelled = tryCancelReplication(id);
+		    Thread.sleep(100);
 		}
 		
-		// cancel a replication
-		dbClient.replicator()
-				.replicatorDocId(replicatorDoc.getId())
-				.replicatorDocRev(replicatorDoc.getRevision())
-				.remove();
+	}
+	
+	private boolean tryCancelReplication(String id) {
+	    
+	    ReplicatorDocument replicatorDoc = dbClient.replicator()
+                .replicatorDocId(id)
+                .find();
+	    LOG.info("Replication state "+replicatorDoc.getReplicationState());
+	    try {
+	    // cancel a replication
+        dbClient.replicator()
+                .replicatorDocId(replicatorDoc.getId())
+                .replicatorDocRev(replicatorDoc.getRevision())
+                .remove();
+	    } catch (DocumentConflictException e) {
+	        return false;
+	    }
+	    return true;
 	}
 	
 	@Test
