@@ -17,30 +17,15 @@
 package org.lightcouch.tests;
 
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.lightcouch.CouchDbClient;
 import org.lightcouch.DesignDocument;
 
-public class DesignDocumentsTest {
-
-	private static CouchDbClient dbClient;
-
-	@BeforeClass
-	public static void setUpClass() {
-		dbClient = new CouchDbClient();
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		dbClient.shutdown();
-	}
+public class DesignDocumentsTest extends CouchDbTestBase {
 
 	@Test
 	public void designDocSync() {
