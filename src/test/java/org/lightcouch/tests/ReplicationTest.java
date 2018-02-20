@@ -101,7 +101,7 @@ public class ReplicationTest {
 	}
 
 	@Test
-	public void replicatorDB() {
+	public void replicatorDB() throws InterruptedException {
 	    
 		String version = dbClient.context().serverVersion();
 		Assume.assumeTrue(!(version.startsWith("0") || version.startsWith("1.0")));
@@ -124,6 +124,14 @@ public class ReplicationTest {
 				.replicatorDocId(response.getId())
 				.find();
 
+		// Wait until complete
+		while ("triggered".equals(replicatorDoc.getReplicationState())) {
+		    replicatorDoc = dbClient.replicator()
+	                .replicatorDocId(response.getId())
+	                .find();
+		    Thread.sleep(10);
+		}
+		
 		// cancel a replication
 		dbClient.replicator()
 				.replicatorDocId(replicatorDoc.getId())

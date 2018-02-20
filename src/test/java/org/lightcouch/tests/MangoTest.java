@@ -21,11 +21,8 @@ import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.junit.AfterClass;
 import org.junit.Assume;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.lightcouch.CouchDbClient;
 
 public class MangoTest extends CouchDbTestBase {	
 	
