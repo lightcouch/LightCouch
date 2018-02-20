@@ -103,7 +103,7 @@ class URIBuilder {
 		}
 		
 		String q = (query.length() == 0) ? "" : "?" + query;
-		String uri = String.format("%s://%s:%s%s%s", new Object[] { scheme, host, port, path, q });
+		String uri = String.format("%s://%s:%d%s%s", new Object[] { scheme, host, port, path, q });
 		
 		try {
 			return new URI(uri);
@@ -112,5 +112,4 @@ class URIBuilder {
 		}
 
 	}
-
 }
