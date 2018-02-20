@@ -6,7 +6,7 @@ addons:
     organization: "indaba"
     branches:
       - master
-      - test-replicator
+      - tests-replicator
 
 services:
   - docker
