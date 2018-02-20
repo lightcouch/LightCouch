@@ -116,26 +116,24 @@ public class URIBuilder {
 	
 	private URI build(boolean includeCredentials) {
 		final StringBuilder query = new StringBuilder();
-		
+
 		for (int i = 0; i < params.size(); i++) {
 			String amp = (i != params.size() - 1) ? "&" : "";
 			query.append(params.get(i) + amp);
 		}
-		
+
 		String q = (query.length() == 0) ? "" : "?" + query;
 		String uri = "";
-		if (includeCredentials && user!=null && password != null) {
-		    uri = String.format("%s://%s:%s@%s:%s%s%s", scheme, user,password, host, port, path, q );
+		if (includeCredentials && user != null && password != null) {
+			uri = String.format("%s://%s:%s@%s:%d%s%s", scheme, user, password, host, port, path, q);
 		} else {
-		  uri = String.format("%s://%s:%s%s%s", scheme, host, port, path, q );
+			uri = String.format("%s://%s:%d%s%s", scheme, host, port, path, q);
+			try {
+				return new URI(uri);
+			} catch (URISyntaxException e) {
+				throw new IllegalArgumentException(e);
+			}
 		}
-		
-		try {
-			return new URI(uri);
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
-
+		return null;
 	}
-	
 }

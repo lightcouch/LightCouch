@@ -111,6 +111,7 @@ final class CouchDbUtil {
 	 * @return Just the name of each member item, not the full paths.
 	 */
 	public static List<String> listResources(String path)  {
+		JarFile jar = null;
 		try {
 			Class<CouchDbUtil> clazz = CouchDbUtil.class;
 			URL dirURL = clazz.getClassLoader().getResource(path);
@@ -119,7 +120,7 @@ final class CouchDbUtil {
 			}
 			if (dirURL != null && dirURL.getProtocol().equals("jar")) {
 				String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); 
-				JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+				jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
 				Enumeration<JarEntry> entries = jar.entries(); 
 				Set<String> result = new HashSet<String>(); 
 				while(entries.hasMoreElements()) {
@@ -138,12 +139,13 @@ final class CouchDbUtil {
 						}
 					}
 				}
-				close(jar);
 				return new ArrayList<String>(result);
 			} 
 			return null;
 		} catch (Exception e) {
 			throw new CouchDbException(e);
+		}finally {
+			close(jar);
 		}
 	}
 
@@ -157,7 +159,8 @@ final class CouchDbUtil {
 				content.append(scanner.nextLine() + LINE_SEP);
 			}
 		} finally {
-			scanner.close();
+			close(instream);
+			close(scanner);
 		}
 		return content.toString();
 	}
