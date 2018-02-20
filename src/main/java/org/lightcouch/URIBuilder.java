@@ -128,12 +128,11 @@ public class URIBuilder {
 			uri = String.format("%s://%s:%s@%s:%d%s%s", scheme, user, password, host, port, path, q);
 		} else {
 			uri = String.format("%s://%s:%d%s%s", scheme, host, port, path, q);
-			try {
-				return new URI(uri);
-			} catch (URISyntaxException e) {
-				throw new IllegalArgumentException(e);
-			}
 		}
-		return null;
+		try {
+			return new URI(uri);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 }
