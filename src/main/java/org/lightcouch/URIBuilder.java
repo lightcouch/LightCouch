@@ -125,11 +125,9 @@ public class URIBuilder {
 		String q = (query.length() == 0) ? "" : "?" + query;
 		String uri = "";
 		if (includeCredentials && user!=null && password != null) {
-		    uri = String.format("%s://%s:%s@%s:%s%s%s", scheme, user,password, host, port, path, q );
+		    uri = String.format("%s://%s:%s@%s:%d%s%s", scheme, user,password, host, port, path, q );
 		} else {
-		  uri = String.format("%s://%s:%s%s%s", scheme, host, port, path, q );
-		}
-		
+		  uri = String.format("%s://%s:%d%s%s", scheme, host, port, path, q );
 		try {
 			return new URI(uri);
 		} catch (URISyntaxException e) {
@@ -137,5 +135,4 @@ public class URIBuilder {
 		}
 
 	}
-	
 }
