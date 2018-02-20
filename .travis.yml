@@ -25,6 +25,7 @@ jobs:
       - docker run -d -p 127.0.0.1:5984:5984 -e COUCHDB_USER=couchdb -e COUCHDB_PASSWORD=couchdb couchdb:2.1.1
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb.properties
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb-2.properties
+      - sleep 10000
       - "curl -X PUT http://127.0.0.1:5984/_users -u couchdb:couchdb"
       - "curl -X PUT http://127.0.0.1:5984/_replicator -u couchdb:couchdb"
       - "curl -X PUT http://127.0.0.1:5984/_global_changes -u couchdb:couchdb"
