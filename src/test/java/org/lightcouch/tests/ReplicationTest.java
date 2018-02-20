@@ -20,11 +20,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.lightcouch.URIBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,11 +41,19 @@ public class ReplicationTest {
 	
 	private static CouchDbClient dbClient;
 	private static CouchDbClient dbClient2;
+	private static URI dbClientUri;
+	private static URI dbClient2Uri;
 	
 	@BeforeClass
 	public static void setUpClass() {
 		dbClient = new CouchDbClient();
 		dbClient2 = new CouchDbClient("couchdb-2.properties");
+		
+		CouchDbConfigTest dbClientConfig = new CouchDbConfigTest();
+		CouchDbConfigTest dbClient2Config = new CouchDbConfigTest("couchdb-2.properties");
+		
+		dbClientUri = buildUri(dbClient.getDBUri()).user(dbClientConfig.getProperties().getUsername()).password(dbClientConfig.getProperties().getPassword()).buildWithCredentials();
+		dbClient2Uri = buildUri(dbClient2.getDBUri()).user(dbClient2Config.getProperties().getUsername()).password(dbClient2Config.getProperties().getPassword()).buildWithCredentials();
 		
 		dbClient.syncDesignDocsWithDb();
 		dbClient2.syncDesignDocsWithDb();
@@ -60,8 +70,8 @@ public class ReplicationTest {
 	    dbClient.getDBUri();
 		ReplicationResult result = dbClient.replication()
 				.createTarget(true)
-				.source(dbClient.getDBUriWithCredentials().toString())
-				.target(dbClient2.getDBUriWithCredentials().toString())
+				.source(dbClientUri.toString())
+				.target(dbClient2Uri.toString())
 				.trigger();
 
 		List<ReplicationHistory> histories = result.getHistories();
@@ -75,8 +85,8 @@ public class ReplicationTest {
     	
 		dbClient.replication()
 				.createTarget(true)
-				.source(dbClient.getDBUriWithCredentials().toString())
-				.target(dbClient2.getDBUriWithCredentials().toString())
+				.source(dbClientUri.toString())
+				.target(dbClient2Uri.toString())
 				.filter("example/example_filter")
 				.queryParams(queryParams)
 				.trigger();
@@ -91,8 +101,8 @@ public class ReplicationTest {
 
 		// trigger a replication
 		Response response = dbClient.replicator()
-				.source(dbClient.getDBUriWithCredentials().toString())
-				.target(dbClient2.getDBUriWithCredentials().toString()).continuous(true)
+				.source(dbClientUri.toString())
+				.target(dbClient2Uri.toString()).continuous(true)
 				.createTarget(true)
 				.save();
 		
@@ -123,8 +133,8 @@ public class ReplicationTest {
 		
 		dbClient.save(foodb1); 
 		
-		dbClient.replication().source(dbClient.getDBUriWithCredentials().toString())
-				.target(dbClient2.getDBUriWithCredentials().toString()).trigger();
+		dbClient.replication().source(dbClientUri.toString())
+				.target(dbClient2Uri.toString()).trigger();
 
 		foodb2 = dbClient2.find(Foo.class, docId); 
 		foodb2.setTitle("titleY"); 
@@ -134,8 +144,8 @@ public class ReplicationTest {
 		foodb1.setTitle("titleZ"); 
 		dbClient.update(foodb1); 
 
-		dbClient.replication().source(dbClient.getDBUriWithCredentials().toString())
-				.target(dbClient2.getDBUriWithCredentials().toString()).trigger();
+		dbClient.replication().source(dbClientUri.toString())
+				.target(dbClient2Uri.toString()).trigger();
 
 		ViewResult<String[], String, Foo> conflicts = dbClient2.view("conflicts/conflict")
 				.includeDocs(true).queryView(String[].class, String.class, Foo.class);
@@ -146,4 +156,10 @@ public class ReplicationTest {
 	private static String generateUUID() {
 		return UUID.randomUUID().toString().replace("-", "");
 	}
+	
+   public static URIBuilder buildUri(URI uri) {
+        URIBuilder builder = URIBuilder.buildUri().scheme(uri.getScheme()).
+                host(uri.getHost()).port(uri.getPort()).path(uri.getPath());
+        return builder;
+    }
 }

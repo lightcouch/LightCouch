@@ -79,13 +79,11 @@ public abstract class CouchDbClientBase {
 
 	private URI baseURI;
 	private URI dbURI;
-	private URI dbURIWithCredentials;
 	private Gson gson; 
 	private CouchDbContext context;
 	private CouchDbDesign design;
 	final HttpClient httpClient;
 	final HttpHost host;
-    
 	
 	CouchDbClientBase() {
 		this(new CouchDbConfig());
@@ -93,28 +91,13 @@ public abstract class CouchDbClientBase {
 	
 	CouchDbClientBase(CouchDbConfig config) {
 		final CouchDbProperties props = config.getProperties();
-		
+		this.httpClient = createHttpClient(props);
+		this.gson = initGson(new GsonBuilder());
+		this.host = new HttpHost(props.getHost(), props.getPort(), props.getProtocol());
 		
 		final String path = props.getPath() != null ? props.getPath() : "";
         this.baseURI = buildUri().scheme(props.getProtocol()).host(props.getHost()).port(props.getPort()).path("/").path(path).build();
 		this.dbURI   = buildUri(baseURI).path(props.getDbName()).path("/").build();
-		if (props.getUsername() != null && props.getPassword()!=null) {
-		  this.dbURIWithCredentials = buildUri().scheme(props.getProtocol())
-		                                     .user(props.getUsername())
-		                                     .password(props.getPassword())
-		                                     .host(props.getHost())
-		                                     .port(props.getPort())
-		                                     .path("/")
-		                                     .path(path)
-		                                     .path(props.getDbName())
-		                                     .path("/").buildWithCredentials();
-		} else {
-		    this.dbURIWithCredentials = dbURI;
-		}
-		
-		this.httpClient = createHttpClient(props);
-        this.gson = initGson(new GsonBuilder());
-        this.host = new HttpHost(props.getHost(), props.getPort(), props.getProtocol());
 		
 		this.context = new CouchDbContext(this, props); 
 		this.design = new CouchDbDesign(this);
@@ -530,13 +513,6 @@ public abstract class CouchDbClientBase {
 	public URI getDBUri() {
 		return dbURI;
 	}
-	
-	/**
-     * @return The database URI with credentials info.
-     */
-    public URI getDBUriWithCredentials() {
-        return dbURIWithCredentials;
-    }
     
 	/**
 	 * @return The Gson instance.

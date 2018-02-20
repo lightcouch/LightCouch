@@ -6,21 +6,20 @@ addons:
     organization: "indaba"
     branches:
       - master
-      - tests-replicator
 
 services:
   - docker
 
 jobs:
   include:
-  # - stage: Build and Test on CouchDB 1.x
-   - install:
+  - stage: Build and Test on CouchDB 1.x
+    install:
       - docker pull couchdb:1.7.1
       - docker run -d -p 127.0.0.1:5984:5984 -e COUCHDB_USER=couchdb -e COUCHDB_PASSWORD=couchdb couchdb:1.7.1
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb.properties
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb-2.properties
-  #- stage: Build and Test on CouchDB 2.x
-   - install:
+  - stage: Build and Test on CouchDB 2.x
+    install:
       - docker pull couchdb:2.1.1
       - docker run -d -p 127.0.0.1:5984:5984 -e COUCHDB_USER=couchdb -e COUCHDB_PASSWORD=couchdb couchdb:2.1.1
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb.properties
@@ -29,5 +28,5 @@ jobs:
       - "curl -X PUT http://127.0.0.1:5984/_users -u couchdb:couchdb"
       - "curl -X PUT http://127.0.0.1:5984/_replicator -u couchdb:couchdb"
       - "curl -X PUT http://127.0.0.1:5984/_global_changes -u couchdb:couchdb"
-     script:
+    script:
       - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar

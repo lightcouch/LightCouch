@@ -29,7 +29,7 @@ import java.util.List;
  * @author Ahmed Yehia
  * 
  */
-class URIBuilder {
+public class URIBuilder {
 	private String scheme;
 	private String host;
 	private int port;
