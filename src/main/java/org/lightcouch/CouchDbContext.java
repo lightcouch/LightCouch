@@ -75,11 +75,25 @@ public class CouchDbContext {
 	 * @param dbName The Database name
 	 */
 	public void createDB(String dbName) {
+		this.createDB(dbName, 0);
+	}
+	
+	/**
+	 * Requests CouchDB creates a new database; if one doesn't exist.
+	 * @param dbName The Database name
+	 * @param shards The number of range partitions (> 0)
+	 */
+	public void createDB(String dbName, int shards) {
 		assertNotEmpty(dbName, "dbName");
 		InputStream getresp = null;
 		HttpResponse putresp = null;
-		final URI uri = buildUri(dbc.getBaseUri()).path(dbName).build();
+		URIBuilder builder = buildUri(dbc.getBaseUri()).path(dbName);
+		if(shards > 0) {
+			builder = builder.query("q", shards);
+		}
+		final URI uri = builder.build();
 		try {
+			
 			getresp = dbc.get(uri);
 		} catch (NoDocumentException e) { // db doesn't exist
 			final HttpPut put = new HttpPut(uri);
