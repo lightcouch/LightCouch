@@ -82,6 +82,7 @@ public abstract class CouchDbClientBase {
 	private Gson gson; 
 	private CouchDbContext context;
 	private CouchDbDesign design;
+	private Local local;
 	final HttpClient httpClient;
 	final HttpHost host;
 	
@@ -101,6 +102,7 @@ public abstract class CouchDbClientBase {
 		
 		this.context = new CouchDbContext(this, props); 
 		this.design = new CouchDbDesign(this);
+		this.local = new Local(this);
 	}
 	
 	// Client(s) provided implementation
@@ -145,6 +147,10 @@ public abstract class CouchDbClientBase {
 	 */
 	public View view(String viewId) {
 		return new View(this, viewId);
+	}
+	
+	public Local local() {
+	    return local;
 	}
 
 	/**
