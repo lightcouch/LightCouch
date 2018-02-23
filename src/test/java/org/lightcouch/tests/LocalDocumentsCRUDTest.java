@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.Assume;
 import org.junit.Test;
+import org.lightcouch.DocumentConflictException;
 import org.lightcouch.NoDocumentException;
 import org.lightcouch.Response;
 
@@ -117,6 +119,7 @@ public class LocalDocumentsCRUDTest extends CouchDbTestBase {
 
     @Test
     public void saveDocWithDuplicateId_allowed() {
+        Assume.assumeTrue(isCouchDB2());
         String id = generateUUID();
         dbClient.local().save(new Foo(id, "one"));
         Foo foo = dbClient.local().find(Foo.class, id);
@@ -127,7 +130,21 @@ public class LocalDocumentsCRUDTest extends CouchDbTestBase {
         assertTrue("two".equals(foo.getTitle()));
     }
 
- // Update
+    @Test
+    public void saveDocWithDuplicateId_throwsDocumentConflictException() {
+        Assume.assumeTrue(isCouchDB1());
+        boolean exceptionCatched = false;
+        String id = generateUUID();
+        dbClient.save(new Foo(id));
+        try {
+            dbClient.save(new Foo(id));
+        } catch (DocumentConflictException e) {
+            exceptionCatched = true;
+        }
+        assertTrue(exceptionCatched);
+    }
+
+    // Update
 
     @Test
     public void update() {
@@ -136,53 +153,70 @@ public class LocalDocumentsCRUDTest extends CouchDbTestBase {
         response = dbClient.local().update(foo);
         assertNotNull(response.getId());
     }
-    
+
     @Test
     public void updateWithIdContainSlash() {
         String idWithSlash = "a/" + generateUUID();
         Response response = dbClient.local().save(new Bar(idWithSlash));
-        
+
         Bar bar = dbClient.local().find(Bar.class, response.getId());
         Response responseUpdate = dbClient.local().update(bar);
-        assertEquals("_local/"+idWithSlash, responseUpdate.getId());
+        assertEquals("_local/" + idWithSlash, responseUpdate.getId());
     }
 
     // Delete
 
     @Test
-    public void deleteObject() {
+    public void deleteObjectV2() {
+        Assume.assumeTrue(isCouchDB2());
         Response response = dbClient.local().save(new Foo());
         Foo foo = dbClient.local().find(Foo.class, response.getId());
         dbClient.local().remove(foo);
     }
 
     @Test
-    public void deleteByIdAndRevValues() {
+    public void deleteObjectV1() {
+        Response response = dbClient.local().save(new Foo());
+        Foo foo = dbClient.local().find(Foo.class, response.getId());
+        dbClient.local().removeWithRev(foo);
+    }
+
+    @Test
+    public void deleteById() {
+        Assume.assumeTrue(isCouchDB2());
         Response response = dbClient.local().save(new Foo());
         response = dbClient.local().remove(response.getId());
         assertNotNull(response);
     }
-    
+
+    @Test
+    public void deleteByIdAndRevValues() {
+        Response response = dbClient.local().save(new Foo());
+        response = dbClient.local().remove(response.getId(), response.getRev());
+        assertNotNull(response);
+    }
+
     @Test
     public void deleteByIdContainSlash() {
+        Assume.assumeTrue(isCouchDB2());
         String idWithSlash = "a/" + generateUUID();
         Response response = dbClient.local().save(new Bar(idWithSlash));
-        
+
         Response responseRemove = dbClient.local().remove(response.getId());
-        assertEquals("_local/"+idWithSlash, responseRemove.getId());
+        assertEquals("_local/" + idWithSlash, responseRemove.getId());
     }
-    
+
     @Test
     public void findAllLocalDocs() {
-
-        List<JsonObject> list =  dbClient.local().findAll();
+        Assume.assumeTrue(isCouchDB2());
+        List<JsonObject> list = dbClient.local().findAll();
         int intialSize = list.size();
         dbClient.local().save(new Foo("test1"));
         dbClient.local().save(new Foo("test2"));
         dbClient.save(new Foo("test3"));
-        
-        list =  dbClient.local().findAll();
-        assertTrue(list.size()==intialSize+2);
+
+        list = dbClient.local().findAll();
+        assertTrue(list.size() == intialSize + 2);
     }
 
 

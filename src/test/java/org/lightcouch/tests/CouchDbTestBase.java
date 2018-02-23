@@ -26,4 +26,8 @@ public class CouchDbTestBase {
         return version.startsWith("2");
     }
     
+    protected boolean isCouchDB1() {
+        String version = dbClient.context().serverVersion();
+        return version.startsWith("0") || version.startsWith("1") ;
+    }
 }

@@ -114,9 +114,24 @@ public class Local {
         return remove(id);
     }
 
+    public Response removeWithRev(Object object) {
+        assertNotEmpty(object, "object");
+        JsonObject jsonObject = dbc.getGson().toJsonTree(object).getAsJsonObject();
+        final String id = getAsString(jsonObject, "_id");
+        final String rev = getAsString(jsonObject, "_rev");
+        return remove(id, rev);
+    }
+
     public Response remove(String id) {
         assertNotEmpty(id, "id");
         final URI docURI = buildURIforLocal(id);
+        return dbc.delete(docURI);
+    }
+
+    public Response remove(String id, String rev) {
+        assertNotEmpty(id, "id");
+        assertNotEmpty(id, "rev");
+        final URI docURI = buildUri(buildURIforLocal(id)).query("rev", rev).build();
         return dbc.delete(docURI);
     }
 
