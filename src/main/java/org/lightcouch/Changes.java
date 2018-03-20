@@ -192,6 +192,11 @@ public class Changes {
 		return this;
 	}
 	
+	public Changes seqInterval(long batchSize) {
+        uriBuilder.query("seq_interval", batchSize);
+        return this;
+    }
+	
 	// Helper
 
 	/**
