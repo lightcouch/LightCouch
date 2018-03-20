@@ -58,6 +58,37 @@ public class ChangeNotificationsTest extends CouchDbTestBase {
 		
 		assertThat(rows.size(), is(1));
 	}
+	
+    @Test
+    public void changes_normalFeed_seqInterval() {
+        Assume.assumeTrue(isCouchDB2());
+
+        dbClient.save(new Foo());
+        dbClient.save(new Foo());
+        dbClient.save(new Foo());
+        dbClient.save(new Foo());
+        dbClient.save(new Foo());
+
+        ChangesResult changes = dbClient.changes().includeDocs(true).limit(5).seqInterval(2).getChanges();
+
+        List<ChangesResult.Row> rows = changes.getResults();
+
+        int seqs = 0;
+        for (Row row : rows) {
+            List<ChangesResult.Row.Rev> revs = row.getChanges();
+            String docId = row.getId();
+            JsonObject doc = row.getDoc();
+            if (row.getSeq() != null)
+                seqs++;
+
+            assertNotNull(revs);
+            assertNotNull(docId);
+            assertNotNull(doc);
+        }
+
+        assertThat(rows.size(), is(5));
+        assertThat(seqs, is(2));
+    }
 
 	@Test
 	public void changes_normalFeed_selector() {
