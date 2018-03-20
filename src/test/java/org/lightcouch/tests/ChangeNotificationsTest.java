@@ -61,6 +61,8 @@ public class ChangeNotificationsTest extends CouchDbTestBase {
 	
     @Test
     public void changes_normalFeed_seqInterval() {
+        Assume.assumeTrue(isCouchDB2());
+
         dbClient.save(new Foo());
         dbClient.save(new Foo());
         dbClient.save(new Foo());
