@@ -1,5 +1,6 @@
 /*
  * Copyright (C) lightcouch.org
+ * Copyright (C) 2018 indaba.es
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,5 +175,25 @@ public class CouchDbContext {
 		final String uri = String.format("%s_uuids?count=%d", dbc.getBaseUri(), count);
 		final JsonObject json = dbc.findAny(JsonObject.class, uri);
 		return dbc.getGson().fromJson(json.get("uuids").toString(), new TypeToken<List<String>>(){}.getType());
+	}
+	
+	/**
+	 * Request all database update events in the CouchDB instance.
+	 * @param since
+	 * @return a list of all database events in the CouchDB instance
+	 */
+	public DbUpdates dbUpdates(String since) {
+		InputStream instream = null;
+		try {
+			URIBuilder builder = buildUri(dbc.getBaseUri()).path("_db_updates");
+			if(since != null && !"".equals(since)) {
+				builder.query("since", since);
+			}
+			instream = dbc.get(builder.build());
+			Reader reader = new InputStreamReader(instream, Charsets.UTF_8);
+			return dbc.getGson().fromJson(reader, DbUpdates.class);
+		} finally {
+			close(instream);
+		}
 	}
 }
