@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 lightcouch.org
+ * Copyright (C) 2018 indaba.es
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -212,11 +213,13 @@ public class Changes {
                 String row = "";
                 do {
                     row = getReader().readLine();
-                } while (row.length() == 0);
+                } while (row.length() == 0 && !stop);
 
-                if (!row.startsWith("{\"last_seq\":")) {
-                    setNextRow(gson.fromJson(row, Row.class));
-                    hasNext = true;
+                if (!stop) {
+                    if (!row.startsWith("{\"last_seq\":")) {
+                        setNextRow(gson.fromJson(row, Row.class));
+                        hasNext = true;
+                    }
                 }
             }
         } catch (Exception e) {

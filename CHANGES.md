@@ -2,6 +2,7 @@
 - [NEW] Added explicit API for local document management.
 - [NEW] Added seq_interval parameter in Changes API
 - [NEW] Added _db_updates endpoint support
+- [IMPROVED] Make more robust stop process in Changes hasNext
 
 # 0.2.1 (21/02/2018)
 - [NEW] Added API for specifying a mango selector _changes operation
