@@ -1,4 +1,4 @@
-# 0.2.2 (UNRELEASED)
+# 0.2.2 (21/03/2018)
 - [NEW] Added explicit API for local document management.
 - [NEW] Added seq_interval parameter in Changes API
 - [NEW] Added _db_updates endpoint support
