@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2011 lightcouch.org
- * Copyright (C) 2018 indaba.es
+ * Copyright (C) 2011 lightcouch.org Copyright (C) 2018 indaba.es
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -18,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.List;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.http.client.methods.HttpGet;
@@ -26,6 +26,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.lightcouch.ChangesResult.Row;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * <p>
@@ -83,7 +85,9 @@ public class Changes {
     private Gson gson;
     private URIBuilder uriBuilder;
 
+    private String filter;
     private String selector;
+    private List<String> docIds;
 
     Changes(CouchDbClientBase dbc) {
         this.dbc = dbc;
@@ -146,10 +150,21 @@ public class Changes {
      */
     public ChangesResult getChanges() {
         final URI uri = uriBuilder.query("feed", "normal").build();
-        if (selector == null) {
+        if (selector == null && docIds == null) {
             return dbc.get(uri, ChangesResult.class);
         } else {
-            return dbc.post(uri, selector, ChangesResult.class);
+            String json = selector;
+            if (docIds != null) {
+                JsonObject docIdsJson = new JsonObject();
+                JsonArray jArray = new JsonArray();
+                for (String id : docIds) {
+                    jArray.add(id);
+                }
+                docIdsJson.add("doc_ids", jArray);
+                json = docIdsJson.toString();
+            }
+
+            return dbc.post(uri, json, ChangesResult.class);
         }
     }
 
@@ -176,13 +191,29 @@ public class Changes {
     }
 
     public Changes filter(String filter) {
+        if (docIds!=null || selector != null) {
+            throw new IllegalArgumentException("Filter is not compatible with selector or docIds filters");
+        }
         uriBuilder.query("filter", filter);
+        this.filter=filter;
         return this;
     }
 
     public Changes selector(String json) {
+        if (docIds!=null || filter != null) {
+            throw new IllegalArgumentException("Selector is not compatible with filters or docIds filters");
+        }
         uriBuilder.query("filter", "_selector");
         this.selector = json;
+        return this;
+    }
+
+    public Changes docIds(List<String> docIds) {
+        if (selector!=null || filter != null) {
+            throw new IllegalArgumentException("DocIds filter is not compatible with filter or selector");
+        }
+        uriBuilder.query("filter", "_doc_ids");
+        this.docIds = docIds;
         return this;
     }
 
