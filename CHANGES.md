@@ -1,4 +1,4 @@
-# 0.2.3 (UNRELEASED)
+# 0.2.3 (18/09/2018)
 - [NEW] Added API for specifying docIds filter to _changes operation
 
 # 0.2.2 (21/03/2018)
