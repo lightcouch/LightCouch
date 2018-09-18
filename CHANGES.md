@@ -1,3 +1,6 @@
+# 0.2.3 (UNRELEASED)
+- [NEW] Added API for specifying docIds filter to _changes operation
+
 # 0.2.2 (21/03/2018)
 - [NEW] Added explicit API for local document management.
 - [NEW] Added seq_interval parameter in Changes API
