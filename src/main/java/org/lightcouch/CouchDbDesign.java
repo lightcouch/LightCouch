@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2018 indaba.es
  * Copyright (C) 2011 lightcouch.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,8 @@ package org.lightcouch;
 
 import static java.lang.String.format;
 import static org.lightcouch.CouchDbUtil.assertNotEmpty;
+import static org.lightcouch.CouchDbUtil.assertTrue;
+import static org.lightcouch.CouchDbUtil.close;
 import static org.lightcouch.CouchDbUtil.listResources;
 import static org.lightcouch.CouchDbUtil.readFile;
 import static org.lightcouch.CouchDbUtil.removeExtension;
@@ -29,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpResponse;
 import org.lightcouch.DesignDocument.MapReduce;
 
 import com.google.gson.JsonArray;
@@ -138,6 +142,25 @@ public class CouchDbDesign {
 		final URI uri = buildUri(dbc.getDBUri()).path(id).query("rev", rev).build();
 		return dbc.get(uri, DesignDocument.class);
 	}
+	
+	/**
+     * Checks if a design document exist in the database.
+     * @param id The document _id field excluding "_desing/" prefix.
+     * @return true If the document is found, false otherwise.
+     */
+    public boolean contains(String id) { 
+        assertNotEmpty(id, "id");
+        assertTrue(id.startsWith(DESIGN_PREFIX),"Desing document id should start with "+DESIGN_PREFIX);
+        HttpResponse response = null;
+        try {
+            response = dbc.head(buildUri(dbc.getDBUri()).path(id).build());
+        } catch (NoDocumentException e) {
+            return false;
+        } finally {
+            close(response);
+        }
+        return true;
+    }
 	
 	/**
 	 * Gets all design documents from desk.

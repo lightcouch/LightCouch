@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2018 indaba.es
  * Copyright (C) 2011 lightcouch.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,6 +63,12 @@ final class CouchDbUtil {
 		if(object != null) {
 			throw new IllegalArgumentException(format("%s should be null.", prefix));
 		} 
+	}
+	
+	public static void assertTrue(boolean expression, String message) throws IllegalArgumentException {
+	    if (!expression) {
+	        throw new IllegalArgumentException(format(message));
+	    }
 	}
 	
 	public static String generateUUID() {

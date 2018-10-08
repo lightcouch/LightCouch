@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2011 indaba.es
  * Copyright (C) 2011 lightcouch.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +19,9 @@ package org.lightcouch.tests;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -49,6 +52,23 @@ public class DesignDocumentsTest extends CouchDbTestBase {
 		dbClient.syncDesignDocsWithDb();
 		
 		assertThat(designDocs.size(), not(0));
+	}
+	
+	@Test
+    public void containsDesignDoc() {
+	    
+	    assertFalse(dbClient.design().contains("_design/test-design-doc-unknown"));
+	    
+	    DesignDocument designDoc1 = dbClient.design().getFromDesk("test-design-doc");
+        dbClient.design().synchronizeWithDb(designDoc1);
+        
+        assertTrue(dbClient.design().contains("_design/test-design-doc"));
+	    
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+    public void containsDesignDocIncorrectId() {
+	    dbClient.design().contains("test-design-doc");
 	}
 
 }

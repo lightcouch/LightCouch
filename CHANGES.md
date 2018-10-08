@@ -1,3 +1,6 @@
+# 0.2.4 (UNRELEASED)
+- [NEW] Added API for checking design doc existence
+
 # 0.2.3 (18/09/2018)
 - [NEW] Added API for specifying docIds filter to _changes operation
 
