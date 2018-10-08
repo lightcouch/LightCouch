@@ -1,4 +1,4 @@
-# 0.2.4 (UNRELEASED)
+# 0.2.4 (08/10/2018)
 - [NEW] Added API for checking design doc existence
 
 # 0.2.3 (18/09/2018)
