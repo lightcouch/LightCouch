@@ -1,3 +1,6 @@
+# 0.2.5 (UNRELEASED)
+- [FIX] Support for string purge_seqs in CouchDB 2.3
+
 # 0.2.4 (08/10/2018)
 - [NEW] Added API for checking design doc existence
 

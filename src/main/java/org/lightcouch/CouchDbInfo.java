@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2018 indaba.es
  * Copyright (C) 2011 lightcouch.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +34,7 @@ public class CouchDbInfo {
 	@SerializedName("update_seq")
 	private String updateSeq;
 	@SerializedName("purge_seq")
-	private long purgeSeq;
+	private String purgeSeq;
 	@SerializedName("compact_running")
 	private boolean compactRunning;
 	@SerializedName("disk_size")
@@ -59,7 +60,7 @@ public class CouchDbInfo {
 		return updateSeq;
 	}
 
-	public long getPurgeSeq() {
+	public String getPurgeSeq() {
 		return purgeSeq;
 	}
 
