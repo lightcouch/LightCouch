@@ -1,4 +1,4 @@
-# 0.2.5 (UNRELEASED)
+# 0.2.5 (23/12/2018)
 - [FIX] Support for string purge_seqs in CouchDB 2.3
 
 # 0.2.4 (08/10/2018)
