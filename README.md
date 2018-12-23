@@ -14,6 +14,6 @@ The releases of this fork are published via Jitpack
 <dependency>
 	<groupId>com.github.IndabaConsultores</groupId>
 	<artifactId>lightCouch</artifactId>
-	<version>0.2.4</version>
+	<version>0.2.5</version>
 </dependency>
 ```
