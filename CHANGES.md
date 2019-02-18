@@ -1,4 +1,4 @@
-# 0.2.6 (UNRELEASED)
+# 0.2.6 (18/02/2019)
 - [NEW] Added support for /db/_purge endpoint implemented in CouchDB 2.3.0
 
 # 0.2.5 (23/12/2018)
