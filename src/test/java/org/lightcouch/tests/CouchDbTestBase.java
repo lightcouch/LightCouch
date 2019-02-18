@@ -20,6 +20,11 @@ public class CouchDbTestBase {
         dbClient.context().deleteDB(dbClientConfig.getProperties().getDbName(), "delete database");
         dbClient.shutdown();
     }
+
+    protected boolean isCouchDB23() {
+        String version = dbClient.context().serverVersion();
+        return version.startsWith("2.3");
+    }
     
     protected boolean isCouchDB2() {
         String version = dbClient.context().serverVersion();

@@ -1,3 +1,6 @@
+# 0.2.6 (UNRELEASED)
+- [NEW] Added support for /db/_purge endpoint implemented in CouchDB 2.3.0
+
 # 0.2.5 (23/12/2018)
 - [FIX] Support for string purge_seqs in CouchDB 2.3
 

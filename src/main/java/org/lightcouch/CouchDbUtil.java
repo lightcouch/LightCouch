@@ -26,9 +26,11 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
@@ -47,21 +49,29 @@ import com.google.gson.JsonObject;
  */
 final class CouchDbUtil {
 
+  private static final String MSG_NOT_NULL = "%s may not be null.";
+  private static final String MSG_NOT_EMPTY = "%s may not be empty.";
+    
   private CouchDbUtil() {
 		// Utility class
 	}
 	
-	public static void assertNotEmpty(Object object, String prefix) throws IllegalArgumentException {
+	@SuppressWarnings("rawtypes")
+    public static void assertNotEmpty(Object object, String prefix) throws IllegalArgumentException {
 		if(object == null) {
-			throw new IllegalArgumentException(format("%s may not be null.", prefix));
+			throw new IllegalArgumentException(format(MSG_NOT_NULL, prefix));
 		} else if(object instanceof String && ((String)object).length() == 0) {
-			throw new IllegalArgumentException(format("%s may not be empty.", prefix));
-		} 
+			throw new IllegalArgumentException(format(MSG_NOT_EMPTY, prefix));
+		} else if(object instanceof Collection && ((Collection)object).isEmpty()) {
+            throw new IllegalArgumentException(format(MSG_NOT_EMPTY, prefix));
+        } else if(object instanceof Map && ((Map)object).isEmpty()) {
+            throw new IllegalArgumentException(format(MSG_NOT_EMPTY, prefix));
+        }
 	}
 	
 	public static void assertNull(Object object, String prefix) throws IllegalArgumentException {
 		if(object != null) {
-			throw new IllegalArgumentException(format("%s should be null.", prefix));
+			throw new IllegalArgumentException(format(MSG_NOT_NULL, prefix));
 		} 
 	}
 	
