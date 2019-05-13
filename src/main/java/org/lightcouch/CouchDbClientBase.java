@@ -36,6 +36,7 @@ import java.util.Map;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -49,6 +50,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
@@ -67,7 +69,7 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * Contains a client Public API implementation.
- * 
+ *
  * @see CouchDbClient
  * @see CouchDbClientAndroid
  * @author Ahmed Yehia
@@ -126,7 +128,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Provides access to DB server APIs.
-     * 
+     *
      * @return {@link CouchDbContext}
      */
     public CouchDbContext context() {
@@ -135,7 +137,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Provides access to CouchDB Design Documents.
-     * 
+     *
      * @return {@link CouchDbDesign}
      */
     public CouchDbDesign design() {
@@ -144,7 +146,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Provides access to CouchDB <tt>View</tt> APIs.
-     * 
+     *
      * @param viewId The view id.
      * @return {@link View}
      */
@@ -158,7 +160,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Provides access to CouchDB <tt>replication</tt> APIs.
-     * 
+     *
      * @return {@link Replication}
      */
     public Replication replication() {
@@ -167,7 +169,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Provides access to the <tt>replicator database</tt>.
-     * 
+     *
      * @return {@link Replicator}
      */
     public Replicator replicator() {
@@ -176,7 +178,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Provides access to <tt>Change Notifications</tt> API.
-     * 
+     *
      * @return {@link Changes}
      */
     public Changes changes() {
@@ -185,7 +187,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Purge operation over database
-     * 
+     *
      * @param toPurge - Map of Ids and the list of revs to purge
      * @return Ids and revs purged
      */
@@ -206,7 +208,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Finds an Object of the specified type.
-     * 
+     *
      * @param <T> Object type.
      * @param classType The class of type T.
      * @param id The document id.
@@ -222,7 +224,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Finds an Object of the specified type.
-     * 
+     *
      * @param <T> Object type.
      * @param classType The class of type T.
      * @param id The document id.
@@ -239,7 +241,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Finds an Object of the specified type.
-     * 
+     *
      * @param <T> Object type.
      * @param classType The class of type T.
      * @param id The document _id field.
@@ -259,7 +261,7 @@ public abstract class CouchDbClientBase {
      * This method finds any document given a URI.
      * <p>
      * The URI must be URI-encoded.
-     * 
+     *
      * @param <T> The class type.
      * @param classType The class of type T.
      * @param uri The URI as string.
@@ -275,7 +277,7 @@ public abstract class CouchDbClientBase {
      * Finds a document and return the result as {@link InputStream}.
      * <p>
      * <b>Note</b>: The stream must be closed after use to release the connection.
-     * 
+     *
      * @param id The document _id field.
      * @return The result as {@link InputStream}
      * @throws NoDocumentException If the document is not found in the database.
@@ -290,7 +292,7 @@ public abstract class CouchDbClientBase {
      * Finds a document given id and revision and returns the result as {@link InputStream}.
      * <p>
      * <b>Note</b>: The stream must be closed after use to release the connection.
-     * 
+     *
      * @param id The document _id field.
      * @param rev The document _rev field.
      * @return The result as {@link InputStream}
@@ -305,7 +307,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Find documents using a declarative JSON querying syntax.
-     * 
+     *
      * @param <T> The class type.
      * @param jsonQuery The JSON query string.
      * @param classOfT The class of type T.
@@ -333,7 +335,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Checks if a document exist in the database.
-     * 
+     *
      * @param id The document _id field.
      * @return true If the document is found, false otherwise.
      */
@@ -355,7 +357,7 @@ public abstract class CouchDbClientBase {
      * <p>
      * If the object doesn't have an <code>_id</code> value, the code will assign a <code>UUID</code> as the document
      * id.
-     * 
+     *
      * @param object The object to save
      * @throws DocumentConflictException If a conflict is detected during the save.
      * @return {@link Response}
@@ -368,7 +370,7 @@ public abstract class CouchDbClientBase {
      * Saves an object in the database using HTTP <tt>POST</tt> request.
      * <p>
      * The database will be responsible for generating the document id.
-     * 
+     *
      * @param object The object to save
      * @return {@link Response}
      */
@@ -386,7 +388,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Saves a document with <tt>batch=ok</tt> query param.
-     * 
+     *
      * @param object The object to save.
      */
     public void batch(Object object) {
@@ -403,7 +405,7 @@ public abstract class CouchDbClientBase {
     /**
      * Updates an object in the database, the object must have the correct <code>_id</code> and <code>_rev</code>
      * values.
-     * 
+     *
      * @param object The object to update
      * @throws DocumentConflictException If a conflict is detected during the update.
      * @return {@link Response}
@@ -416,7 +418,7 @@ public abstract class CouchDbClientBase {
      * Removes a document from the database.
      * <p>
      * The object must have the correct <code>_id</code> and <code>_rev</code> values.
-     * 
+     *
      * @param object The document to remove as object.
      * @throws NoDocumentException If the document is not found in the database.
      * @return {@link Response}
@@ -431,7 +433,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Removes a document from the database given both a document <code>_id</code> and <code>_rev</code> values.
-     * 
+     *
      * @param id The document _id field.
      * @param rev The document _rev field.
      * @throws NoDocumentException If the document is not found in the database.
@@ -446,7 +448,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Performs bulk documents create and update request.
-     * 
+     *
      * @param objects The {@link List} of documents objects.
      * @param newEdits If false, prevents the database from assigning documents new revision IDs.
      * @return {@code List<Response>} Containing the resulted entries.
@@ -469,7 +471,7 @@ public abstract class CouchDbClientBase {
      * Saves an attachment to a new document with a generated <tt>UUID</tt> as the document id.
      * <p>
      * To retrieve an attachment, see {@link #find(String)}.
-     * 
+     *
      * @param in The {@link InputStream} holding the binary data.
      * @param name The attachment name.
      * @param contentType The attachment "Content-Type".
@@ -488,7 +490,7 @@ public abstract class CouchDbClientBase {
      * given only the id, and rev as {@code null}.
      * <p>
      * To retrieve an attachment, see {@link #find(String)}.
-     * 
+     *
      * @param in The {@link InputStream} holding the binary data.
      * @param name The attachment name.
      * @param contentType The attachment "Content-Type".
@@ -507,12 +509,12 @@ public abstract class CouchDbClientBase {
 
     /**
      * Invokes an Update Handler.
-     * 
+     *
      * <pre>
      * Params params = new Params().addParam("field", "foo").addParam("value", "bar");
      * String output = dbClient.invokeUpdateHandler("designDoc/update1", "docId", params);
      * </pre>
-     * 
+     *
      * @param updateHandlerUri The Update Handler URI, in the format: <code>designDoc/update1</code>
      * @param docId The document id to update.
      * @param params The query parameters as {@link Params}.
@@ -532,7 +534,7 @@ public abstract class CouchDbClientBase {
      * Executes a HTTP request.
      * <p>
      * <b>Note</b>: The response must be closed after use to release the connection.
-     * 
+     *
      * @param request The HTTP request to execute.
      * @return {@link HttpResponse}
      */
@@ -556,7 +558,7 @@ public abstract class CouchDbClientBase {
      * Sets a {@link GsonBuilder} to create {@link Gson} instance.
      * <p>
      * Useful for registering custom serializers/deserializers, such as JodaTime classes.
-     * 
+     *
      * @param gsonBuilder The {@link GsonBuilder}
      */
     public void setGsonBuilder(GsonBuilder gsonBuilder) {
@@ -588,7 +590,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Performs a HTTP GET request.
-     * 
+     *
      * @return {@link InputStream}
      */
     InputStream get(HttpGet httpGet) {
@@ -598,7 +600,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Performs a HTTP GET request.
-     * 
+     *
      * @return {@link InputStream}
      */
     InputStream get(URI uri) {
@@ -608,8 +610,20 @@ public abstract class CouchDbClientBase {
     }
 
     /**
+     * Performs a HTTP GET request with given Headers.
+     *
+     * @return {@link InputStream}
+     */
+    InputStream get(URI uri, Header[] headers) {
+        HttpGet get = new HttpGet(uri);
+        get.setHeaders(headers);
+        get.addHeader("Accept", "application/json");
+        return get(get);
+    }
+
+    /**
      * Performs a HTTP GET request.
-     * 
+     *
      * @return An object of type T
      */
     <T> T get(URI uri, Class<T> classType) {
@@ -625,8 +639,25 @@ public abstract class CouchDbClientBase {
     }
 
     /**
+     * Performs a HTTP GET request with headers.
+     *
+     * @return An object of type T
+     */
+    <T> T get(URI uri, Class<T> classType, Header[] headers) {
+        InputStream in = null;
+        try {
+            in = get(uri, headers);
+            return getGson().fromJson(new InputStreamReader(in, "UTF-8"), classType);
+        } catch (UnsupportedEncodingException e) {
+            throw new CouchDbException(e);
+        } finally {
+            close(in);
+        }
+    }
+
+    /**
      * Performs a HTTP HEAD request.
-     * 
+     *
      * @return {@link HttpResponse}
      */
     HttpResponse head(URI uri) {
@@ -635,7 +666,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Performs a HTTP PUT request, saves or updates a document.
-     * 
+     *
      * @return {@link Response}
      */
     Response put(URI uri, Object object, boolean newEntity) {
@@ -663,7 +694,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Performs a HTTP PUT request, saves an attachment.
-     * 
+     *
      * @return {@link Response}
      */
     Response put(URI uri, InputStream instream, String contentType) {
@@ -682,7 +713,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Performs a HTTP POST request.
-     * 
+     *
      * @return {@link HttpResponse}
      */
     HttpResponse post(URI uri, String json) {
@@ -721,7 +752,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Performs a HTTP DELETE request.
-     * 
+     *
      * @return {@link Response}
      */
     Response delete(URI uri) {
@@ -739,7 +770,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Validates a HTTP response; on error cases logs status and throws relevant exceptions.
-     * 
+     *
      * @param response The HTTP response.
      */
     void validate(HttpResponse response) throws IOException {
@@ -754,6 +785,9 @@ public abstract class CouchDbClientBase {
             }
             case HttpStatus.SC_CONFLICT: {
                 throw new DocumentConflictException(reason);
+            }
+            case HttpStatus.SC_NOT_MODIFIED: {
+                throw new DocumentNotModifiedException(reason);
             }
             default: { // other errors: 400 | 401 | 500 etc.
                 throw new CouchDbException(reason += EntityUtils.toString(response.getEntity()));
@@ -782,7 +816,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Sets a JSON String as a request entity.
-     * 
+     *
      * @param httpRequest The request to set entity.
      * @param json The JSON String to set.
      */
@@ -794,7 +828,7 @@ public abstract class CouchDbClientBase {
 
     /**
      * Builds {@link Gson} and registers any required serializer/deserializer.
-     * 
+     *
      * @return {@link Gson} instance
      */
     private Gson initGson(GsonBuilder gsonBuilder) {
@@ -811,5 +845,23 @@ public abstract class CouchDbClientBase {
 
         });
         return gsonBuilder.create();
+    }
+
+    /**
+     * @param <T>       Object type.
+     * @param classType The class of type T.
+     * @param id        The document _id field.
+     * @param rev       The document revision to check against.
+     * @return An Object of type T if it has been modified since the specified revision
+     * @throws DocumentNotModifiedException If the document has not been modified
+     */
+    public <T> T findIfModified(Class<T> classType, String id, String rev) {
+        assertNotEmpty(classType, "Class");
+        assertNotEmpty(id, "id");
+        assertNotEmpty(rev, "rev");
+
+        final URI uri = buildUri(getDBUri()).pathEncoded(id).build();
+        Header[] headers = new Header[]{new BasicHeader("If-None-Match", String.format("\"%s\"", rev))};
+        return get(uri, classType, headers);
     }
 }
