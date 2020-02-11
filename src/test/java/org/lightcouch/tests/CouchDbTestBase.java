@@ -4,6 +4,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.lightcouch.CouchDbClient;
 
+import com.github.zafarkhaja.semver.Version;
+
 public class CouchDbTestBase {
 
     protected static CouchDbClient dbClient;
@@ -22,17 +24,20 @@ public class CouchDbTestBase {
     }
 
     protected boolean isCouchDB23() {
-        String version = dbClient.context().serverVersion();
-        return version.startsWith("2.3");
+        return isCouchDBVersion(">=2.3.0");
     }
     
     protected boolean isCouchDB2() {
-        String version = dbClient.context().serverVersion();
-        return version.startsWith("2");
+        return isCouchDBVersion(">=2.0.0");
     }
     
     protected boolean isCouchDB1() {
+        return isCouchDBVersion(">=0.0.0 & <2.0.0"); 
+    }
+    
+    protected boolean isCouchDBVersion(String versionExpression) {
         String version = dbClient.context().serverVersion();
-        return version.startsWith("0") || version.startsWith("1") ;
+        Version serverVersion = Version.valueOf(version);
+        return serverVersion.satisfies(versionExpression);
     }
 }
