@@ -16,13 +16,15 @@ jobs:
   - stage: Build and Test on CouchDB 3.0.x
     install:
       - docker pull couchdb:3.0.0
-      - docker run -d -p 127.0.0.1:5984:5984 -e COUCHDB_USER=couchdb -e COUCHDB_PASSWORD=couchdb couchdb:2.3.1
+      - docker run -d -p 127.0.0.1:5984:5984 -e COUCHDB_USER=couchdb -e COUCHDB_PASSWORD=couchdb couchdb:3.0.0
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb.properties
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb-2.properties
       - sleep 20
       - "curl -X PUT http://127.0.0.1:5984/_users -u couchdb:couchdb"
       - "curl -X PUT http://127.0.0.1:5984/_replicator -u couchdb:couchdb"
       - "curl -X PUT http://127.0.0.1:5984/_global_changes -u couchdb:couchdb"
+    script:
+      - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
   - stage: Build and Test on CouchDB 2.3.x
     install:
       - docker pull couchdb:2.3.1
@@ -37,18 +39,6 @@ jobs:
     install:
       - docker pull couchdb:2.2.0
       - docker run -d -p 127.0.0.1:5984:5984 -e COUCHDB_USER=couchdb -e COUCHDB_PASSWORD=couchdb couchdb:2.2.0
-      - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb.properties
-      - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb-2.properties
-      - sleep 20
-      - "curl -X PUT http://127.0.0.1:5984/_users -u couchdb:couchdb"
-      - "curl -X PUT http://127.0.0.1:5984/_replicator -u couchdb:couchdb"
-      - "curl -X PUT http://127.0.0.1:5984/_global_changes -u couchdb:couchdb"
-    script:
-      - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar
-  - stage: Build and Test on CouchDB 2.1.x
-    install:
-      - docker pull couchdb:2.1.2
-      - docker run -d -p 127.0.0.1:5984:5984 -e COUCHDB_USER=couchdb -e COUCHDB_PASSWORD=couchdb couchdb:2.1.2
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb.properties
       - sed 's/^couchdb.username.*/couchdb.username=couchdb/;s/^couchdb.password.*/couchdb.password=couchdb/' -i src/test/resources/couchdb-2.properties
       - sleep 20
